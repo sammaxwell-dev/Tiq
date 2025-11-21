@@ -55,11 +55,12 @@ const TranslationModal: React.FC<TranslationModalProps> = ({ initialText, onClos
   useEffect(() => {
     if (!isPinned) {
         setSourceText(initialText);
-        if (initialText && visible) {
+        // Only auto-translate if there's no pre-translated content
+        if (initialText && visible && !initialTranslation) {
             handleTranslate();
         }
     }
-  }, [initialText, visible]);
+  }, [initialText, visible, initialTranslation]);
 
   // --- Drag Logic ---
   const handleMouseDown = (e: React.MouseEvent) => {

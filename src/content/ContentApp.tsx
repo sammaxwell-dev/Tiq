@@ -11,6 +11,7 @@ const ContentApp = () => {
   const [instantTranslation, setInstantTranslation] = useState(false);
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isSelectingRef = useRef(false);
 
   useEffect(() => {
     storage.get().then(settings => {
@@ -19,8 +20,25 @@ const ContentApp = () => {
   }, []);
 
   useEffect(() => {
+    const handleMouseDown = () => {
+      isSelectingRef.current = true;
+      setIsIconVisible(false); // Hide icon immediately when starting selection
+    };
+
+    const handleMouseUp = () => {
+      isSelectingRef.current = false;
+      // Wait a bit for selection to finalize, then show icon
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        handleSelectionChange();
+      }, 50);
+    };
+
     const handleSelectionChange = () => {
-      if (isModalVisible) return;
+      // Don't show icon if user is still selecting or if modal is visible
+      if (isSelectingRef.current || isModalVisible) return;
 
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || !sel.toString().trim()) {
@@ -49,36 +67,78 @@ const ContentApp = () => {
 
           setSelection({ text, rect });
 
-          // Упрощенное позиционирование иконки
+          // Функция для получения позиции конца выделения
+          const getSelectionEndPosition = () => {
+            // Создаем копию диапазона для поиска конца выделения
+            const endRange = range.cloneRange();
+
+            // Схлопываем диапазон до точки в конце выделения
+            endRange.collapse(false); // false схлопывает в конец диапазона
+
+            // Получаем прямоугольник для точки конца выделения
+            const endRect = endRange.getBoundingClientRect();
+
+            // Если эндпоинт имеет нулевые размеры (часто бывает для точек),
+            // используем исходный rect с корректировкой
+            if (endRect.width === 0 && endRect.height === 0) {
+              // Для выделений слева направо (LTR)
+              if (range.startContainer === range.endContainer) {
+                // Выделение в одном контейнере
+                const isLTR = range.startOffset <= range.endOffset;
+                if (isLTR) {
+                  return { x: rect.right, y: rect.bottom };
+                } else {
+                  return { x: rect.left, y: rect.top };
+                }
+              } else {
+                // Сложное выделение через несколько контейнеров
+                // Используем rect.right, rect.bottom как наиболее надежные значения
+                return { x: rect.right, y: rect.bottom };
+              }
+            }
+
+            return { x: endRect.right, y: endRect.bottom };
+          };
+
+          // Упрощенное позиционирование иконки на основе конца выделения
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
           const ICON_SIZE = 32;
           const PADDING = 16; // Минимальный отступ от краев
           const OFFSET = 8;
 
+          const selectionEnd = getSelectionEndPosition();
+
           let x: number, y: number;
 
-          // Для больших выделений (высота > половины экрана) - фиксированная позиция в правом нижнем углу
-          if (rect.height > viewportHeight / 2) {
-            x = viewportWidth - ICON_SIZE - PADDING;
-            y = viewportHeight - ICON_SIZE - PADDING;
-          } else {
-            // Пробуем справа сверху от выделения
-            x = rect.right + OFFSET;
-            y = rect.top;
+          // Всегда позиционируем относительно конца выделения
+          x = selectionEnd.x + OFFSET;
+          y = selectionEnd.y;
 
-            // Если не помещается справа или сверху, используем справа снизу
-            if (x + ICON_SIZE > viewportWidth - PADDING || y < PADDING) {
-              x = rect.right + OFFSET;
-              y = rect.bottom + OFFSET;
-            }
-
-            // Финальная корректировка границ
-            x = Math.max(PADDING, Math.min(x, viewportWidth - ICON_SIZE - PADDING));
-            y = Math.max(PADDING, Math.min(y, viewportHeight - ICON_SIZE - PADDING));
+          // Если не помещается, пробуем альтернативные позиции
+          if (x + ICON_SIZE > viewportWidth - PADDING) {
+            // Слева от конца выделения
+            x = selectionEnd.x - ICON_SIZE - OFFSET;
           }
 
+          if (y + ICON_SIZE > viewportHeight - PADDING) {
+            // Выше конца выделения
+            y = selectionEnd.y - ICON_SIZE - OFFSET;
+          }
+
+          // Если даже альтернативные позиции выходят за пределы, используем безопасную позицию
+          if (selectionEnd.y < 0 || selectionEnd.y > viewportHeight) {
+            // Конец выделения вне видимой зоны - используем центр видимой части выделения
+            x = Math.min(rect.left + rect.width / 2, viewportWidth - ICON_SIZE - PADDING);
+            y = Math.min(rect.top + rect.height / 2, viewportHeight - ICON_SIZE - PADDING);
+          }
+
+          // Финальная корректировка границ
+          x = Math.max(PADDING, Math.min(x, viewportWidth - ICON_SIZE - PADDING));
+          y = Math.max(PADDING, Math.min(y, viewportHeight - ICON_SIZE - PADDING));
+
           setIconPos({ x, y });
+          console.log('Setting icon visible at position:', { x, y });
           setIsIconVisible(true);
         } catch (error) {
           console.error('Error positioning icon:', error);
@@ -87,19 +147,16 @@ const ContentApp = () => {
       }
     };
 
-    const onSelectionChange = () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(handleSelectionChange, 150);
-    };
-
-    document.addEventListener('selectionchange', onSelectionChange);
-    document.addEventListener('mouseup', onSelectionChange);
+    // Add mousedown/mouseup for selection tracking
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
+    // Keep selectionchange for programmatic selections
+    document.addEventListener('selectionchange', handleSelectionChange);
 
     return () => {
-      document.removeEventListener('selectionchange', onSelectionChange);
-      document.removeEventListener('mouseup', onSelectionChange);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('selectionchange', handleSelectionChange);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -107,9 +164,17 @@ const ContentApp = () => {
   }, [isModalVisible]);
 
   const handleIconClick = async () => {
+    console.log('handleIconClick called', { selection, instantTranslation });
+
+    if (!selection) {
+      console.log('No selection, returning');
+      return;
+    }
+
     setIsIconVisible(false);
 
-    if (instantTranslation && selection) {
+    // If instant translation is enabled, pre-translate the text
+    if (instantTranslation) {
       try {
         // Check if extension context is valid
         if (!chrome.runtime?.id) {
@@ -119,7 +184,9 @@ const ContentApp = () => {
         }
 
         const settings = await storage.get();
-        const response = await chrome.runtime.sendMessage({
+
+        // Add timeout for message response
+        const messagePromise = chrome.runtime.sendMessage({
           type: 'TRANSLATE_REQUEST',
           payload: {
             text: selection.text,
@@ -127,18 +194,33 @@ const ContentApp = () => {
           }
         });
 
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 30000); // 30 second timeout
+        });
+
+        const response = await Promise.race([messagePromise, timeoutPromise]);
+
         if (response && response.success) {
           setInitialTranslation(response.data);
         } else {
           setInitialTranslation(response?.error || 'Translation failed');
         }
-      } catch (error) {
-        setInitialTranslation('Failed to communicate with extension');
+      } catch (error: any) {
+        console.error('Translation request error:', error);
+        if (error.message === 'Request timeout') {
+          setInitialTranslation('Translation request timed out. Please try again.');
+        } else if (error.message?.includes('Extension context invalidated')) {
+          setInitialTranslation('Extension reloaded. Please refresh the page and try again.');
+        } else {
+          setInitialTranslation('Failed to communicate with extension. Please try again.');
+        }
       }
     } else {
+      // No pre-translation - let the modal handle it when it opens
       setInitialTranslation(undefined);
     }
 
+    // Always show the modal, with or without pre-translated content
     setIsModalVisible(true);
   };
 

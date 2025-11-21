@@ -44,15 +44,26 @@ async function handleTranslation(payload: { text: string; targetLang: string; co
     ];
 
     const result = await fetchCompletion(
-      { apiKey: settings.apiKey, model: settings.model }, 
+      { apiKey: settings.apiKey, model: settings.model },
       messages
     );
-    
+
     sendResponse({ success: true, data: result });
 
   } catch (error: any) {
     console.error('Translation error:', error);
-    sendResponse({ success: false, error: error.message || 'Unknown error' });
+    // More specific error messages for common issues
+    let errorMessage = 'Unknown error occurred';
+    if (error.message?.includes('401')) {
+      errorMessage = 'Invalid API key. Please check your OpenAI API key.';
+    } else if (error.message?.includes('429')) {
+      errorMessage = 'Rate limit exceeded. Please try again later.';
+    } else if (error.message?.includes('quota')) {
+      errorMessage = 'API quota exceeded. Please check your OpenAI billing.';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    sendResponse({ success: false, error: errorMessage });
   }
 }
 

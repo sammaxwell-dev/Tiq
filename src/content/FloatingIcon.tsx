@@ -10,10 +10,25 @@ interface FloatingIconProps {
 }
 
 const FloatingIcon: React.FC<FloatingIconProps> = ({ x, y, onClick, visible }) => {
+  console.log('FloatingIcon render:', { x, y, visible });
+
   if (!visible) return null;
 
   // Адаптивный размер иконки
   const isMobile = window.innerWidth < 640;
+
+  const handleClick = (e: React.MouseEvent) => {
+    console.log('FloatingIcon clicked!', { x, y });
+    e.preventDefault();
+    e.stopPropagation();
+    onClick();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    console.log('FloatingIcon mousedown');
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   return (
     <button
@@ -22,15 +37,14 @@ const FloatingIcon: React.FC<FloatingIconProps> = ({ x, y, onClick, visible }) =
         isMobile ? "w-10 h-10" : "w-8 h-8" // Чуть больше на мобильных для удобства
       )}
       style={{
-        left: x,
-        top: y,
+        left: `${x}px`,
+        top: `${y}px`,
+        pointerEvents: 'auto',
       }}
-      onMouseDown={(e) => e.preventDefault()} // Prevent losing selection
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
       aria-label="Translate selection"
+      type="button"
     >
       <Sparkles size={isMobile ? 18 : 16} />
     </button>
