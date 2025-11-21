@@ -1,18 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
-import FloatingIcon from './FloatingIcon';
+import TranslatorTooltip from './TranslatorTooltip';
 import TranslationModal from './modal/TranslationModal';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
+import { TranslationTone } from '../types/tone';
 
 const ContentApp = () => {
   const [selection, setSelection] = useState<{ text: string; rect: DOMRect } | null>(null);
-  const [isIconVisible, setIsIconVisible] = useState(false);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInstantPopupVisible, setIsInstantPopupVisible] = useState(false);
-  const [iconClicked, setIconClicked] = useState(false);
-  const [iconPos, setIconPos] = useState({ x: 0, y: 0 });
+  const [tooltipClicked, setTooltipClicked] = useState(false);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [instantTranslation, setInstantTranslation] = useState(false);
+  const [selectedTone, setSelectedTone] = useState<TranslationTone>('standard');
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingRef = useRef(false);
@@ -20,18 +22,21 @@ const ContentApp = () => {
   useEffect(() => {
     storage.get().then(settings => {
       setInstantTranslation(settings.instantTranslation);
+      if (settings.translationTone) {
+        setSelectedTone(settings.translationTone);
+      }
     });
   }, []);
 
   useEffect(() => {
     const handleMouseDown = () => {
       isSelectingRef.current = true;
-      setIsIconVisible(false); // Hide icon immediately when starting selection
+      setIsTooltipVisible(false); // Hide tooltip immediately when starting selection
     };
 
     const handleMouseUp = () => {
       isSelectingRef.current = false;
-      // Wait a bit for selection to finalize, then show icon
+      // Wait a bit for selection to finalize, then show tooltip
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
@@ -40,13 +45,20 @@ const ContentApp = () => {
       }, 50);
     };
 
+    const handleKeyUp = () => {
+      // Handle keyboard selections (Shift + arrows, Ctrl+A, etc.)
+      if (!isSelectingRef.current) {
+        handleSelectionChange();
+      }
+    };
+
     const handleSelectionChange = () => {
-      // Don't show icon if user is still selecting or if any UI is visible or icon was clicked
-      if (isSelectingRef.current || isModalVisible || isInstantPopupVisible || iconClicked) return;
+      // Don't show tooltip if user is still selecting or if any UI is visible or tooltip was clicked
+      if (isSelectingRef.current || isModalVisible || isInstantPopupVisible || tooltipClicked) return;
 
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || !sel.toString().trim()) {
-        setIsIconVisible(false);
+        setIsTooltipVisible(false);
         setSelection(null);
         return;
       }
@@ -57,7 +69,7 @@ const ContentApp = () => {
           const range = sel.getRangeAt(0);
           const rect = range.getBoundingClientRect();
 
-          // Проверяем, что выделение видимо в viewport
+          // Check if selection is visible in viewport
           const isVisible = rect.width > 0 && rect.height > 0 &&
                            rect.top < window.innerHeight &&
                            rect.bottom > 0 &&
@@ -65,88 +77,23 @@ const ContentApp = () => {
                            rect.right > 0;
 
           if (!isVisible) {
-            setIsIconVisible(false);
+            setIsTooltipVisible(false);
             return;
           }
 
           setSelection({ text, rect });
 
-          // Функция для получения позиции конца выделения
-          const getSelectionEndPosition = () => {
-            // Создаем копию диапазона для поиска конца выделения
-            const endRange = range.cloneRange();
+          // PRECISE POSITIONING: Calculate tooltip position above selection
+          // Account for scroll position using window.scrollY and window.scrollX
+          const x = rect.left + (rect.width / 2) + window.scrollX; // Center horizontally
+          const y = rect.top + window.scrollY; // Top of selection + scroll offset
 
-            // Схлопываем диапазон до точки в конце выделения
-            endRange.collapse(false); // false схлопывает в конец диапазона
-
-            // Получаем прямоугольник для точки конца выделения
-            const endRect = endRange.getBoundingClientRect();
-
-            // Если эндпоинт имеет нулевые размеры (часто бывает для точек),
-            // используем исходный rect с корректировкой
-            if (endRect.width === 0 && endRect.height === 0) {
-              // Для выделений слева направо (LTR)
-              if (range.startContainer === range.endContainer) {
-                // Выделение в одном контейнере
-                const isLTR = range.startOffset <= range.endOffset;
-                if (isLTR) {
-                  return { x: rect.right, y: rect.bottom };
-                } else {
-                  return { x: rect.left, y: rect.top };
-                }
-              } else {
-                // Сложное выделение через несколько контейнеров
-                // Используем rect.right, rect.bottom как наиболее надежные значения
-                return { x: rect.right, y: rect.bottom };
-              }
-            }
-
-            return { x: endRect.right, y: endRect.bottom };
-          };
-
-          // Упрощенное позиционирование иконки на основе конца выделения
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
-          const ICON_SIZE = 32;
-          const PADDING = 16; // Минимальный отступ от краев
-          const OFFSET = 8;
-
-          const selectionEnd = getSelectionEndPosition();
-
-          let x: number, y: number;
-
-          // Всегда позиционируем относительно конца выделения
-          x = selectionEnd.x + OFFSET;
-          y = selectionEnd.y;
-
-          // Если не помещается, пробуем альтернативные позиции
-          if (x + ICON_SIZE > viewportWidth - PADDING) {
-            // Слева от конца выделения
-            x = selectionEnd.x - ICON_SIZE - OFFSET;
-          }
-
-          if (y + ICON_SIZE > viewportHeight - PADDING) {
-            // Выше конца выделения
-            y = selectionEnd.y - ICON_SIZE - OFFSET;
-          }
-
-          // Если даже альтернативные позиции выходят за пределы, используем безопасную позицию
-          if (selectionEnd.y < 0 || selectionEnd.y > viewportHeight) {
-            // Конец выделения вне видимой зоны - используем центр видимой части выделения
-            x = Math.min(rect.left + rect.width / 2, viewportWidth - ICON_SIZE - PADDING);
-            y = Math.min(rect.top + rect.height / 2, viewportHeight - ICON_SIZE - PADDING);
-          }
-
-          // Финальная корректировка границ
-          x = Math.max(PADDING, Math.min(x, viewportWidth - ICON_SIZE - PADDING));
-          y = Math.max(PADDING, Math.min(y, viewportHeight - ICON_SIZE - PADDING));
-
-          setIconPos({ x, y });
-          console.log('Setting icon visible at position:', { x, y });
-          setIsIconVisible(true);
+          setTooltipPos({ x, y });
+          console.log('Setting tooltip visible at position:', { x, y, scrollY: window.scrollY });
+          setIsTooltipVisible(true);
         } catch (error) {
-          console.error('Error positioning icon:', error);
-          setIsIconVisible(false);
+          console.error('Error positioning tooltip:', error);
+          setIsTooltipVisible(false);
         }
       }
     };
@@ -154,30 +101,42 @@ const ContentApp = () => {
     // Add mousedown/mouseup for selection tracking
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('keyup', handleKeyUp);
     // Keep selectionchange for programmatic selections
     document.addEventListener('selectionchange', handleSelectionChange);
 
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('selectionchange', handleSelectionChange);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isModalVisible, isInstantPopupVisible, iconClicked]);
+  }, [isModalVisible, isInstantPopupVisible, tooltipClicked]);
 
-  const handleModalClick = async () => {
-    console.log('handleModalClick called', { selection, instantTranslation });
+  const handleTranslate = async (mode: 'modal' | 'inline') => {
+    console.log('handleTranslate called', { mode, selection, instantTranslation, selectedTone });
 
     if (!selection) {
       console.log('No selection, returning');
       return;
     }
 
-    setIsIconVisible(false);
-    setIconClicked(true);
+    setIsTooltipVisible(false);
+    setTooltipClicked(true);
 
+    if (mode === 'inline') {
+      // Handle inline replacement
+      await handleInlineTranslation();
+    } else {
+      // Handle modal translation
+      await handleModalTranslation();
+    }
+  };
+
+  const handleModalTranslation = async () => {
     // If instant translation is enabled, translate and show popup
     if (instantTranslation) {
       try {
@@ -194,8 +153,9 @@ const ContentApp = () => {
         const messagePromise = chrome.runtime.sendMessage({
           type: 'TRANSLATE_REQUEST',
           payload: {
-            text: selection.text,
+            text: selection!.text,
             targetLang: settings.targetLang,
+            tone: selectedTone,
           }
         });
 
@@ -230,35 +190,26 @@ const ContentApp = () => {
     }
   };
 
-  const handleInlineClick = async () => {
-    console.log('handleInlineClick called', { selection });
-
-    if (!selection) {
-      console.log('No selection, returning');
-      return;
-    }
-
-    setIsIconVisible(false);
-    setIconClicked(true);
-
+  const handleInlineTranslation = async () => {
     try {
       // Check if extension context is valid
       if (!chrome.runtime?.id) {
         console.error('Extension context invalid');
         alert('Extension reloading, please refresh the page');
-        setIconClicked(false);
+        setTooltipClicked(false);
         return;
       }
 
       const settings = await storage.get();
 
-      // Request translation with inline context
+      // Request translation with inline context and tone
       const messagePromise = chrome.runtime.sendMessage({
         type: 'TRANSLATE_REQUEST',
         payload: {
-          text: selection.text,
+          text: selection!.text,
           targetLang: settings.targetLang,
           context: 'inline-replace', // Special context for inline mode
+          tone: selectedTone,
         }
       });
 
@@ -289,7 +240,7 @@ const ContentApp = () => {
         alert('Failed to translate. Please try again.');
       }
     } finally {
-      setIconClicked(false);
+      setTooltipClicked(false);
       // Don't clear selection immediately to allow for inline replacement
       setTimeout(() => {
         window.getSelection()?.removeAllRanges();
@@ -297,16 +248,23 @@ const ContentApp = () => {
     }
   };
 
+  const handleToneChange = async (tone: TranslationTone) => {
+    setSelectedTone(tone);
+    // Save to storage for persistence
+    await storage.set({ translationTone: tone });
+    console.log('Tone changed to:', tone);
+  };
+
   const handleCloseModal = () => {
     setIsModalVisible(false);
-    setIconClicked(false);
+    setTooltipClicked(false);
     window.getSelection()?.removeAllRanges();
   };
 
   const handleCloseInstantPopup = () => {
     setIsInstantPopupVisible(false);
     setInitialTranslation(undefined);
-    setIconClicked(false);
+    setTooltipClicked(false);
     window.getSelection()?.removeAllRanges();
   };
 
@@ -323,12 +281,13 @@ const ContentApp = () => {
 
   return (
     <>
-      <FloatingIcon
-        x={iconPos.x}
-        y={iconPos.y}
-        visible={isIconVisible && !iconClicked}
-        onModalClick={handleModalClick}
-        onInlineClick={handleInlineClick}
+      <TranslatorTooltip
+        x={tooltipPos.x}
+        y={tooltipPos.y}
+        visible={isTooltipVisible && !tooltipClicked}
+        selectedTone={selectedTone}
+        onTranslate={handleTranslate}
+        onToneChange={handleToneChange}
       />
 
       {selection && isModalVisible && (
@@ -343,7 +302,7 @@ const ContentApp = () => {
       {selection && isInstantPopupVisible && initialTranslation && (
         <InstantTranslationPopUp
           translation={initialTranslation}
-          position={iconPos}
+          position={tooltipPos}
           onClose={handleCloseInstantPopup}
           onCopy={handleCopyTranslation}
           onOpenModal={handleOpenFullModal}

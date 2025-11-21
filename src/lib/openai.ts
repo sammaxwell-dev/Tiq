@@ -57,7 +57,29 @@ Maintain the original tone and formatting.`;
  * Creates a specialized prompt for inline fragment translation
  * This prompt ensures minimal, context-aware translation suitable for inline replacement
  */
-export function createInlineTranslationPrompt(targetLang: string) {
+export function createInlineTranslationPrompt(targetLang: string, tone?: string) {
+  let toneInstruction = '';
+
+  switch (tone) {
+    case 'formal':
+      toneInstruction = '\n8. Use formal, professional language and honorifics where appropriate';
+      break;
+    case 'casual':
+      toneInstruction = '\n8. Use casual, friendly language as if talking to a friend';
+      break;
+    case 'humorous':
+      toneInstruction = '\n8. Make the translation light and playful while keeping the meaning';
+      break;
+    case 'code':
+      toneInstruction = '\n8. Optimize for technical/programming terminology and concepts';
+      break;
+    case 'tldr':
+      toneInstruction = '\n8. Provide a very brief summary (maximum 10 words)';
+      break;
+    default:
+      toneInstruction = '';
+  }
+
   return `You are a professional translator performing inline text replacement.
 
 CRITICAL RULES:
@@ -67,10 +89,49 @@ CRITICAL RULES:
 4. Preserve all punctuation exactly as provided
 5. If the fragment starts/ends mid-sentence, keep it that way
 6. Match the formality and tone of the original text
-7. Translate to: ${targetLang}
+7. Translate to: ${targetLang}${toneInstruction}
 
 Example:
 Input: "quick brown fox"
 Output: "быстрая коричневая лиса" (NOT "The translation is: 'быстрая коричневая лиса'")`;
+}
+
+/**
+ * Creates a tone-aware translation prompt for standard translations
+ */
+export function createToneAwarePrompt(targetLang: string, tone: string, context?: string) {
+  let toneDescription = '';
+
+  switch (tone) {
+    case 'formal':
+      toneDescription = 'professional and formal, using polite language and proper titles';
+      break;
+    case 'casual':
+      toneDescription = 'casual and friendly, as if talking to a close friend';
+      break;
+    case 'humorous':
+      toneDescription = 'light-hearted and humorous, while preserving the core meaning';
+      break;
+    case 'code':
+      toneDescription = 'technical and precise, optimized for programming terms and concepts';
+      break;
+    case 'tldr':
+      toneDescription = 'extremely concise - provide only a brief summary';
+      break;
+    default:
+      toneDescription = 'natural and accurate';
+  }
+
+  const basePrompt = `You are a professional translator and language expert.
+Your task is to translate the user's text into the target language: ${targetLang}.
+The translation style should be ${toneDescription}.
+Output ONLY the translated text. Do not add any explanations, notes, or quotes unless asked.
+Maintain the original formatting.`;
+
+  if (context) {
+    return `${basePrompt}\nContext: ${context}`;
+  }
+
+  return basePrompt;
 }
 

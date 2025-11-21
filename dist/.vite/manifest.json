@@ -5,109 +5,109 @@
     "src": "../../../../@crx/manifest",
     "isEntry": true
   },
-  "_ContentApp-YeCG5n8b.js": {
-    "file": "assets/ContentApp-YeCG5n8b.js",
+  "_ContentApp-CGUNwen9.js": {
+    "file": "assets/ContentApp-CGUNwen9.js",
     "name": "ContentApp",
     "imports": [
-      "_Select-DvCYUd5R.js",
-      "_storage-DaJmYFgk.js",
-      "_Loader-miXIPUOC.js"
+      "_Select-DVHqK8Ie.js",
+      "_storage-CmcN9rvR.js",
+      "_Loader-B7UvaqpD.js"
     ]
   },
-  "_Input-BwuvaMEz.js": {
-    "file": "assets/Input-BwuvaMEz.js",
+  "_Input-BHOHuPgd.js": {
+    "file": "assets/Input-BHOHuPgd.js",
     "name": "Input",
     "imports": [
-      "_Select-DvCYUd5R.js"
+      "_Select-DVHqK8Ie.js"
     ]
   },
-  "_Loader-miXIPUOC.js": {
-    "file": "assets/Loader-miXIPUOC.js",
+  "_Loader-B7UvaqpD.js": {
+    "file": "assets/Loader-B7UvaqpD.js",
     "name": "Loader",
     "imports": [
-      "_Select-DvCYUd5R.js"
+      "_Select-DVHqK8Ie.js"
     ]
   },
-  "_Select-DvCYUd5R.js": {
-    "file": "assets/Select-DvCYUd5R.js",
+  "_Select-DVHqK8Ie.js": {
+    "file": "assets/Select-DVHqK8Ie.js",
     "name": "Select"
   },
-  "_storage-DaJmYFgk.js": {
-    "file": "assets/storage-DaJmYFgk.js",
+  "_storage-CmcN9rvR.js": {
+    "file": "assets/storage-CmcN9rvR.js",
     "name": "storage"
   },
   "_tailwind-!~{003}~.js": {
-    "file": "assets/tailwind-BTo_a4cO.css",
+    "file": "assets/tailwind-DRXiMi3P.css",
     "src": "_tailwind-!~{003}~.js"
   },
-  "_tailwind-B61suGA_.js": {
-    "file": "assets/tailwind-B61suGA_.js",
+  "_tailwind-BBZgbfrI.js": {
+    "file": "assets/tailwind-BBZgbfrI.js",
     "name": "tailwind",
     "css": [
-      "assets/tailwind-BTo_a4cO.css"
+      "assets/tailwind-DRXiMi3P.css"
     ]
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-ChTWQxhb.js",
+    "file": "assets/index.tsx-loader-BHIoFMNz.js",
     "src": "index.tsx-loader.js"
   },
   "playground.html": {
-    "file": "assets/playground-gmrqXSL9.js",
+    "file": "assets/playground-BFmXk1_G.js",
     "name": "playground",
     "src": "playground.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-B61suGA_.js",
-      "_Select-DvCYUd5R.js",
-      "_ContentApp-YeCG5n8b.js",
-      "_storage-DaJmYFgk.js",
-      "_Loader-miXIPUOC.js"
+      "_tailwind-BBZgbfrI.js",
+      "_Select-DVHqK8Ie.js",
+      "_ContentApp-CGUNwen9.js",
+      "_storage-CmcN9rvR.js",
+      "_Loader-B7UvaqpD.js"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-ltOihqUY.js",
+    "file": "assets/index.ts-DIpb6GQ1.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
     "imports": [
-      "_storage-DaJmYFgk.js"
+      "_storage-CmcN9rvR.js"
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-XESx5dHY.js",
+    "file": "assets/index.tsx-Dfu_jok9.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
-      "_Select-DvCYUd5R.js",
-      "_ContentApp-YeCG5n8b.js",
-      "_storage-DaJmYFgk.js",
-      "_Loader-miXIPUOC.js"
+      "_Select-DVHqK8Ie.js",
+      "_ContentApp-CGUNwen9.js",
+      "_storage-CmcN9rvR.js",
+      "_Loader-B7UvaqpD.js"
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-BkQmDoF3.js",
+    "file": "assets/index.html-BKEEdPrQ.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-B61suGA_.js",
-      "_Select-DvCYUd5R.js",
-      "_Input-BwuvaMEz.js",
-      "_storage-DaJmYFgk.js"
+      "_tailwind-BBZgbfrI.js",
+      "_Select-DVHqK8Ie.js",
+      "_Input-BHOHuPgd.js",
+      "_storage-CmcN9rvR.js"
     ]
   },
   "src/popup/index.html": {
-    "file": "assets/index.html-C5rzLHBD.js",
+    "file": "assets/index.html-DFoRrJdO.js",
     "name": "index.html",
     "src": "src/popup/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-B61suGA_.js",
-      "_Select-DvCYUd5R.js",
-      "_Loader-miXIPUOC.js",
-      "_Input-BwuvaMEz.js",
-      "_storage-DaJmYFgk.js"
+      "_tailwind-BBZgbfrI.js",
+      "_Select-DVHqK8Ie.js",
+      "_Loader-B7UvaqpD.js",
+      "_Input-BHOHuPgd.js",
+      "_storage-CmcN9rvR.js"
     ]
   }
 }

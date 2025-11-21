@@ -1,12 +1,12 @@
 import { storage } from '../lib/storage';
-import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt } from '../lib/openai';
+import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt, createToneAwarePrompt } from '../lib/openai';
 
 console.log('Tippr Background Service Worker started');
 
 // Message types
-type MessageType = 
+type MessageType =
   | { type: 'PING' }
-  | { type: 'TRANSLATE_REQUEST'; payload: { text: string; targetLang: string; context?: string } }
+  | { type: 'TRANSLATE_REQUEST'; payload: { text: string; targetLang: string; context?: string; tone?: string } }
   | { type: 'VALIDATE_API_KEY'; payload: { key: string } };
 
 chrome.runtime.onMessage.addListener((message: MessageType, _, sendResponse) => {
@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((message: MessageType, _, sendResponse) => 
   }
 });
 
-async function handleTranslation(payload: { text: string; targetLang: string; context?: string }, sendResponse: (response: any) => void) {
+async function handleTranslation(payload: { text: string; targetLang: string; context?: string; tone?: string }, sendResponse: (response: any) => void) {
   try {
     const settings = await storage.get();
     if (!settings.apiKey) {
@@ -37,10 +37,21 @@ async function handleTranslation(payload: { text: string; targetLang: string; co
       return;
     }
 
-    // Use inline translation prompt for inline-replace context
-    const systemPrompt = payload.context === 'inline-replace'
-      ? createInlineTranslationPrompt(payload.targetLang)
-      : createTranslationPrompt(payload.targetLang, payload.context);
+    const tone = payload.tone || 'standard';
+
+    // Use tone-aware prompts based on context
+    let systemPrompt: string;
+
+    if (payload.context === 'inline-replace') {
+      // Inline replacement mode with tone
+      systemPrompt = createInlineTranslationPrompt(payload.targetLang, tone);
+    } else if (tone !== 'standard') {
+      // Standard translation with custom tone
+      systemPrompt = createToneAwarePrompt(payload.targetLang, tone, payload.context);
+    } else {
+      // Standard translation with standard tone
+      systemPrompt = createTranslationPrompt(payload.targetLang, payload.context);
+    }
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },

@@ -1,3 +1,5 @@
+import { TranslationTone } from '../types/tone';
+
 export interface AppSettings {
   apiKey: string;
   targetLang: string;
@@ -5,6 +7,7 @@ export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
   showBackdrop: boolean;
   instantTranslation: boolean;
+  translationTone: TranslationTone;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -14,6 +17,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   theme: 'system',
   showBackdrop: false,
   instantTranslation: false,
+  translationTone: 'standard',
 };
 
 export const storage = {
