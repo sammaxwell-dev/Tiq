@@ -1,1 +1,0 @@
-import{a as e,j as t}from"./Switch-E304tgl6.js";import{S as n,C as r}from"./ContentApp-CzidiWZE.js";import"./storage-DaJmYFgk.js";import"./SettingsTab-D8tYyWdQ.js";console.log("Tippr content script loaded");const o=document.createElement("div");o.id="tippr-container";document.body.appendChild(o);const i=e(o);i.render(t.jsx(n,{children:t.jsx(r,{})}));

@@ -3,6 +3,7 @@ import FloatingIcon from './FloatingIcon';
 import TranslationModal from './modal/TranslationModal';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
+import { performInlineReplace } from '../lib/inlineReplace';
 
 const ContentApp = () => {
   const [selection, setSelection] = useState<{ text: string; rect: DOMRect } | null>(null);
@@ -166,8 +167,8 @@ const ContentApp = () => {
     };
   }, [isModalVisible, isInstantPopupVisible, iconClicked]);
 
-  const handleIconClick = async () => {
-    console.log('handleIconClick called', { selection, instantTranslation });
+  const handleModalClick = async () => {
+    console.log('handleModalClick called', { selection, instantTranslation });
 
     if (!selection) {
       console.log('No selection, returning');
@@ -229,6 +230,73 @@ const ContentApp = () => {
     }
   };
 
+  const handleInlineClick = async () => {
+    console.log('handleInlineClick called', { selection });
+
+    if (!selection) {
+      console.log('No selection, returning');
+      return;
+    }
+
+    setIsIconVisible(false);
+    setIconClicked(true);
+
+    try {
+      // Check if extension context is valid
+      if (!chrome.runtime?.id) {
+        console.error('Extension context invalid');
+        alert('Extension reloading, please refresh the page');
+        setIconClicked(false);
+        return;
+      }
+
+      const settings = await storage.get();
+
+      // Request translation with inline context
+      const messagePromise = chrome.runtime.sendMessage({
+        type: 'TRANSLATE_REQUEST',
+        payload: {
+          text: selection.text,
+          targetLang: settings.targetLang,
+          context: 'inline-replace', // Special context for inline mode
+        }
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 30000);
+      });
+
+      const response = await Promise.race([messagePromise, timeoutPromise]);
+
+      if (response && response.success) {
+        // Perform inline replacement with typewriter animation
+        const result = await performInlineReplace(response.data);
+
+        if (result) {
+          console.log('Inline replacement successful');
+          // Optionally store restore function for undo feature
+          // For now, the replacement is permanent after animation completes
+        }
+      } else {
+        console.error('Translation failed:', response?.error);
+        alert(`Translation failed: ${response?.error || 'Unknown error'}`);
+      }
+    } catch (error: any) {
+      console.error('Inline translation error:', error);
+      if (error.message === 'Request timeout') {
+        alert('Translation request timed out. Please try again.');
+      } else {
+        alert('Failed to translate. Please try again.');
+      }
+    } finally {
+      setIconClicked(false);
+      // Don't clear selection immediately to allow for inline replacement
+      setTimeout(() => {
+        window.getSelection()?.removeAllRanges();
+      }, 500);
+    }
+  };
+
   const handleCloseModal = () => {
     setIsModalVisible(false);
     setIconClicked(false);
@@ -259,7 +327,8 @@ const ContentApp = () => {
         x={iconPos.x}
         y={iconPos.y}
         visible={isIconVisible && !iconClicked}
-        onClick={handleIconClick}
+        onModalClick={handleModalClick}
+        onInlineClick={handleInlineClick}
       />
 
       {selection && isModalVisible && (

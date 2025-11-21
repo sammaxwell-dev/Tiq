@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Copy, ArrowRightLeft, Settings, Sparkles, Pin, PinOff, ChevronLeft } from 'lucide-react';
+import { X, Copy, ArrowRightLeft, Sparkles, Pin, PinOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Textarea';
 import { Select } from '../../components/ui/Select';
 import { Loader } from '../../components/ui/Loader';
-import SettingsTab from './SettingsTab';
 import { cn } from '../../lib/utils';
 import { storage } from '../../lib/storage';
 
 interface TranslationModalProps {
-  initialText: string;
+  initialText?: string;
   onClose: () => void;
   visible: boolean;
   initialTranslation?: string;
@@ -35,7 +34,6 @@ const TranslationModal: React.FC<TranslationModalProps> = ({ initialText, onClos
   const [state, setState] = useState<TranslationState>(initialTranslation ? 'success' : 'idle');
   const [targetLang, setTargetLang] = useState('ru');
   const [showBackdrop, setShowBackdrop] = useState(false);
-  const [activeTab, setActiveTab] = useState<'translate' | 'settings'>('translate');
 
   // Clear translation when modal closes
   useEffect(() => {
@@ -258,159 +256,125 @@ const TranslationModal: React.FC<TranslationModalProps> = ({ initialText, onClos
       >
         {/* Header */}
         <div
-          className="flex items-center justify-between px-6 py-4 cursor-move select-none bg-white/30 dark:bg-black/20 backdrop-blur-md border-b border-white/10"
+          className="flex items-center justify-between px-6 py-4 cursor-move select-none bg-white/30 dark:bg-white/5 backdrop-blur-md border-b border-white/10"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center gap-2">
-            {activeTab === 'settings' ? (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 -ml-2 rounded-full hover:bg-white/40 dark:hover:bg-white/10"
-                onClick={() => setActiveTab('translate')}
-              >
-                <ChevronLeft size={18} />
-              </Button>
-            ) : (
-              <div className="p-1.5 bg-white/50 dark:bg-white/10 rounded-lg shadow-sm">
-                <Sparkles className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              </div>
-            )}
+            <div className="p-1.5 bg-white/50 dark:bg-white/10 rounded-lg shadow-sm">
+              <Sparkles className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+            </div>
             <span className="font-semibold text-sm text-foreground/80 dark:text-white/90">
-              {activeTab === 'settings' ? 'Settings' : 'Tippr AI'}
+              Tippr
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {activeTab === 'translate' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn("h-8 w-8 rounded-full hover:bg-white/40 dark:hover:bg-white/10", isPinned ? "text-blue-500" : "text-muted-foreground")}
-                onClick={togglePin}
-                title={isPinned ? "Unpin window" : "Pin window to keep open"}
-              >
-                {isPinned ? <PinOff size={16} /> : <Pin size={16} />}
-              </Button>
-            )}
-            {activeTab === 'translate' && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-full hover:bg-white/40 dark:hover:bg-white/10 text-muted-foreground"
-                onClick={() => setActiveTab('settings')}
-              >
-                <Settings size={16} />
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/40 dark:hover:bg-white/10 text-muted-foreground" onClick={onClose}>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("h-8 w-8 rounded-full hover:bg-white/40 dark:hover:bg-white/10", isPinned ? "text-blue-500" : "text-muted-foreground dark:text-white/60")}
+              onClick={togglePin}
+              title={isPinned ? "Unpin window" : "Pin window to keep open"}
+            >
+              {isPinned ? <PinOff size={16} /> : <Pin size={16} />}
+            </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/40 dark:hover:bg-white/10 text-muted-foreground dark:text-white/60" onClick={onClose}>
               <X size={16} />
             </Button>
           </div>
         </div>
 
-        {activeTab === 'settings' ? (
-          <SettingsTab />
-        ) : (
-          <>
-            {/* Controls */}
-            <div className="px-6 pt-4 pb-2 flex items-center gap-3">
-              <Select className="h-9 bg-white/40 dark:bg-white/5 border-0 shadow-sm text-sm font-medium dark:text-white">
-                <option value="auto">Detect Language</option>
-                <option value="en">English</option>
-                <option value="ru">Russian</option>
-              </Select>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto max-h-[70vh]">
+          {/* Controls */}
+          <div className="px-6 pt-4 pb-2 flex items-center gap-3">
+            <Select className="h-9 bg-white/40 dark:bg-white/5 border-0 shadow-sm text-sm font-medium dark:text-white dark:bg-white/10">
+              <option value="auto">Detect Language</option>
+              <option value="en">English</option>
+              <option value="ru">Russian</option>
+            </Select>
 
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 rounded-full hover:bg-white/50 dark:hover:bg-white/10">
-                <ArrowRightLeft size={14} className="text-muted-foreground dark:text-white/70" />
-              </Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 rounded-full hover:bg-white/50 dark:hover:bg-white/10">
+              <ArrowRightLeft size={14} className="text-muted-foreground dark:text-white/70" />
+            </Button>
 
-              <Select
-                className="h-9 bg-white/40 dark:bg-white/5 border-0 shadow-sm text-sm font-medium dark:text-white"
-                value={targetLang}
-                onChange={(e) => setTargetLang(e.target.value)}
-              >
-                <option value="ru">Russian</option>
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-              </Select>
+            <Select
+              className="h-9 bg-white/40 dark:bg-white/5 border-0 shadow-sm text-sm font-medium dark:text-white dark:bg-white/10"
+              value={targetLang}
+              onChange={(e) => setTargetLang(e.target.value)}
+            >
+              <option value="ru">Russian</option>
+              <option value="en">English</option>
+              <option value="es">Spanish</option>
+            </Select>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 space-y-4">
+            {/* Source */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground ml-1 dark:text-white/60">Original</label>
+              <Textarea
+                value={sourceText}
+                onChange={(e) => setSourceText(e.target.value)}
+                className="min-h-[80px] bg-white/30 dark:bg-white/5 border-transparent focus:bg-white/60 dark:focus:bg-white/10 shadow-inner text-base dark:text-white dark:placeholder:text-white/30 rounded-2xl"
+                placeholder="Enter text..."
+              />
             </div>
 
-            {/* Body */}
-            <div className="p-6 space-y-4">
-              {/* Source */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground ml-1 dark:text-white/60">Original</label>
-                <Textarea
-                  value={sourceText}
-                  onChange={(e) => setSourceText(e.target.value)}
-                  className="min-h-[80px] bg-white/30 dark:bg-white/5 border-transparent focus:bg-white/60 dark:focus:bg-white/10 shadow-inner text-base dark:text-white dark:placeholder:text-white/30"
-                  placeholder="Enter text..."
-                />
-              </div>
-
-              {/* Result */}
-              <div className="space-y-2 relative">
-                <label className="text-xs font-medium text-muted-foreground ml-1 dark:text-white/60">Translation</label>
-                <div className={cn(
-                  "relative min-h-[100px] p-4 rounded-xl transition-all duration-300",
-                  "bg-blue-50/40 dark:bg-blue-900/20 border border-blue-100/50 dark:border-blue-800/30"
-                )}>
-                  {state === 'loading' ? (
-                    <div className="flex flex-col items-center justify-center h-full py-4 space-y-3">
-                      <Loader size={24} className="opacity-70 dark:text-blue-400" />
-                      <span className="text-xs text-blue-600/70 dark:text-blue-300/70 animate-pulse">Polishing translation...</span>
-                    </div>
-                  ) : state === 'error' ? (
-                    <div className="text-red-500 text-sm">Something went wrong.</div>
-                  ) : (
-                    <div className="text-base text-foreground dark:text-white leading-relaxed selection:bg-blue-200/50 dark:selection:bg-blue-500/30">
-                      {targetText || <span className="text-muted-foreground dark:text-white/40 italic opacity-50">Translation will appear here...</span>}
-                    </div>
-                  )}
-                </div>
-
-                {state === 'success' && (
-                  <div className="absolute bottom-3 right-3 flex space-x-1">
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="h-8 w-8 bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 shadow-sm backdrop-blur-sm"
-                      onClick={handleCopy}
-                    >
-                      <Copy size={14} className="text-foreground/70 dark:text-white/80" />
-                    </Button>
+            {/* Result */}
+            <div className="space-y-2 relative">
+              <label className="text-xs font-medium text-muted-foreground ml-1 dark:text-white/60">Translation</label>
+              <div className={cn(
+                "relative min-h-[100px] p-4 rounded-2xl transition-all duration-300",
+                "bg-blue-50/40 dark:bg-blue-900/20 border border-blue-100/50 dark:border-blue-800/30"
+              )}>
+                {state === 'loading' ? (
+                  <div className="flex flex-col items-center justify-center h-full py-4 space-y-3">
+                    <Loader size={24} className="opacity-70 dark:text-blue-400" />
+                    <span className="text-xs text-blue-600/70 dark:text-blue-300/70 animate-pulse">Polishing translation...</span>
+                  </div>
+                ) : state === 'error' ? (
+                  <div className="text-red-500 text-sm">Something went wrong.</div>
+                ) : (
+                  <div className="text-base text-foreground dark:text-white leading-relaxed selection:bg-blue-200/50 dark:selection:bg-blue-500/30">
+                    {targetText || <span className="text-muted-foreground dark:text-white/40 italic opacity-50">Translation will appear here...</span>}
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Footer */}
-            <div className="px-6 py-4 bg-white/30 dark:bg-black/10 border-t border-white/10 flex justify-between items-center">
-              <Button variant="ghost" size="sm" className="text-muted-foreground dark:text-white/60 hover:text-foreground dark:hover:text-white" onClick={() => setActiveTab('settings')}>
-                <Settings size={14} className="mr-2" /> Settings
-              </Button>
-
-              <Button
-                onClick={handleTranslate}
-                disabled={state === 'loading'}
-                className="bg-black/90 hover:bg-black dark:bg-white dark:text-black dark:hover:bg-white/90 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 rounded-xl px-6"
-              >
-                {state === 'loading' ? 'Translating...' : 'Translate'}
-              </Button>
+              {state === 'success' && (
+                <div className="absolute bottom-3 right-3 flex space-x-1">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 bg-white/60 dark:bg-white/10 hover:bg-white dark:hover:bg-white/20 shadow-sm backdrop-blur-sm"
+                    onClick={handleCopy}
+                  >
+                    <Copy size={14} className="text-foreground/70 dark:text-white/80" />
+                  </Button>
+                </div>
+              )}
             </div>
-          </>
-        )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 bg-white/30 dark:bg-white/5 border-t border-white/10 flex justify-end items-center">
+            <Button
+              onClick={handleTranslate}
+              disabled={state === 'loading'}
+              className="bg-black/90 hover:bg-black dark:bg-white dark:text-black dark:hover:bg-white/90 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 rounded-xl px-6"
+            >
+              {state === 'loading' ? 'Translating...' : 'Translate'}
+            </Button>
+          </div>
+        </div>
 
         {/* Resizer handle */}
         <div
-          className="resizer absolute bottom-0 right-0 w-6 h-6 cursor-se-resize opacity-50 hover:opacity-100 z-50 flex items-center justify-center"
+          className="resizer absolute bottom-0 right-0 w-6 h-6 cursor-se-resize"
           onMouseDown={handleResizeStart}
-        >
-          <svg width="10" height="10" viewBox="0 0 6 6" className="fill-gray-400 dark:fill-gray-600 pointer-events-none">
-            <path d="M6 6V3L3 6H6ZM2 6L6 2V0L0 6H2Z" />
-          </svg>
-        </div>
+        />
       </div>
     </>
   );

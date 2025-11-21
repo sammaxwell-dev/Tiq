@@ -40,7 +40,7 @@ export async function fetchCompletion(
 }
 
 export function createTranslationPrompt(targetLang: string, context?: string) {
-  const systemPrompt = `You are a professional translator and language expert. 
+  const systemPrompt = `You are a professional translator and language expert.
 Your task is to translate the user's text into the target language: ${targetLang}.
 Output ONLY the translated text. Do not add any explanations, notes, or quotes unless asked.
 Maintain the original tone and formatting.`;
@@ -49,7 +49,28 @@ Maintain the original tone and formatting.`;
   if (context) {
       return `${systemPrompt}\nContext: ${context}`;
   }
-  
+
   return systemPrompt;
+}
+
+/**
+ * Creates a specialized prompt for inline fragment translation
+ * This prompt ensures minimal, context-aware translation suitable for inline replacement
+ */
+export function createInlineTranslationPrompt(targetLang: string) {
+  return `You are a professional translator performing inline text replacement.
+
+CRITICAL RULES:
+1. Return ONLY the translated text - NO explanations, quotes, or conversational filler
+2. The input may be a sentence fragment, not a complete sentence - translate it as-is
+3. Preserve the exact capitalization style of the original (Title Case, lowercase, UPPERCASE, etc.)
+4. Preserve all punctuation exactly as provided
+5. If the fragment starts/ends mid-sentence, keep it that way
+6. Match the formality and tone of the original text
+7. Translate to: ${targetLang}
+
+Example:
+Input: "quick brown fox"
+Output: "быстрая коричневая лиса" (NOT "The translation is: 'быстрая коричневая лиса'")`;
 }
 

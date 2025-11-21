@@ -1,5 +1,5 @@
 import { storage } from '../lib/storage';
-import { fetchCompletion, createTranslationPrompt } from '../lib/openai';
+import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt } from '../lib/openai';
 
 console.log('Tippr Background Service Worker started');
 
@@ -37,7 +37,11 @@ async function handleTranslation(payload: { text: string; targetLang: string; co
       return;
     }
 
-    const systemPrompt = createTranslationPrompt(payload.targetLang, payload.context);
+    // Use inline translation prompt for inline-replace context
+    const systemPrompt = payload.context === 'inline-replace'
+      ? createInlineTranslationPrompt(payload.targetLang)
+      : createTranslationPrompt(payload.targetLang, payload.context);
+
     const messages = [
       { role: 'system' as const, content: systemPrompt },
       { role: 'user' as const, content: payload.text }

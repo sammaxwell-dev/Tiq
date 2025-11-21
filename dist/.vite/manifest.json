@@ -1,65 +1,71 @@
 {
   "../../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-CnQycx2X.js",
+    "file": "assets/crx-manifest.js-CJKY3zwC.js",
     "name": "crx-manifest.js",
     "src": "../../../../@crx/manifest",
     "isEntry": true
   },
-  "_ContentApp-CzidiWZE.js": {
-    "file": "assets/ContentApp-CzidiWZE.js",
+  "_ContentApp-YeCG5n8b.js": {
+    "file": "assets/ContentApp-YeCG5n8b.js",
     "name": "ContentApp",
     "imports": [
-      "_Switch-E304tgl6.js",
+      "_Select-DvCYUd5R.js",
       "_storage-DaJmYFgk.js",
-      "_SettingsTab-D8tYyWdQ.js"
+      "_Loader-miXIPUOC.js"
     ]
   },
-  "_SettingsTab-D8tYyWdQ.js": {
-    "file": "assets/SettingsTab-D8tYyWdQ.js",
-    "name": "SettingsTab",
+  "_Input-BwuvaMEz.js": {
+    "file": "assets/Input-BwuvaMEz.js",
+    "name": "Input",
     "imports": [
-      "_Switch-E304tgl6.js",
-      "_storage-DaJmYFgk.js"
+      "_Select-DvCYUd5R.js"
     ]
   },
-  "_Switch-E304tgl6.js": {
-    "file": "assets/Switch-E304tgl6.js",
-    "name": "Switch"
+  "_Loader-miXIPUOC.js": {
+    "file": "assets/Loader-miXIPUOC.js",
+    "name": "Loader",
+    "imports": [
+      "_Select-DvCYUd5R.js"
+    ]
+  },
+  "_Select-DvCYUd5R.js": {
+    "file": "assets/Select-DvCYUd5R.js",
+    "name": "Select"
   },
   "_storage-DaJmYFgk.js": {
     "file": "assets/storage-DaJmYFgk.js",
     "name": "storage"
   },
   "_tailwind-!~{003}~.js": {
-    "file": "assets/tailwind-CYdMWgL_.css",
+    "file": "assets/tailwind-BTo_a4cO.css",
     "src": "_tailwind-!~{003}~.js"
   },
-  "_tailwind-BbpH4bYn.js": {
-    "file": "assets/tailwind-BbpH4bYn.js",
+  "_tailwind-B61suGA_.js": {
+    "file": "assets/tailwind-B61suGA_.js",
     "name": "tailwind",
     "css": [
-      "assets/tailwind-CYdMWgL_.css"
+      "assets/tailwind-BTo_a4cO.css"
     ]
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-9hDdxfbX.js",
+    "file": "assets/index.tsx-loader-ChTWQxhb.js",
     "src": "index.tsx-loader.js"
   },
   "playground.html": {
-    "file": "assets/playground-BtXz-q69.js",
+    "file": "assets/playground-gmrqXSL9.js",
     "name": "playground",
     "src": "playground.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-BbpH4bYn.js",
-      "_Switch-E304tgl6.js",
-      "_ContentApp-CzidiWZE.js",
+      "_tailwind-B61suGA_.js",
+      "_Select-DvCYUd5R.js",
+      "_ContentApp-YeCG5n8b.js",
       "_storage-DaJmYFgk.js",
-      "_SettingsTab-D8tYyWdQ.js"
+      "_Loader-miXIPUOC.js"
     ]
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-BbY68_gi.js",
+    "file": "assets/index.ts-ltOihqUY.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
@@ -68,37 +74,39 @@
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-DdBlDD8y.js",
+    "file": "assets/index.tsx-XESx5dHY.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
-      "_Switch-E304tgl6.js",
-      "_ContentApp-CzidiWZE.js",
+      "_Select-DvCYUd5R.js",
+      "_ContentApp-YeCG5n8b.js",
       "_storage-DaJmYFgk.js",
-      "_SettingsTab-D8tYyWdQ.js"
+      "_Loader-miXIPUOC.js"
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-ByDlgiid.js",
+    "file": "assets/index.html-BkQmDoF3.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-BbpH4bYn.js",
-      "_Switch-E304tgl6.js",
+      "_tailwind-B61suGA_.js",
+      "_Select-DvCYUd5R.js",
+      "_Input-BwuvaMEz.js",
       "_storage-DaJmYFgk.js"
     ]
   },
   "src/popup/index.html": {
-    "file": "assets/index.html-EB_sg57G.js",
+    "file": "assets/index.html-C5rzLHBD.js",
     "name": "index.html",
     "src": "src/popup/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-BbpH4bYn.js",
-      "_Switch-E304tgl6.js",
-      "_SettingsTab-D8tYyWdQ.js",
+      "_tailwind-B61suGA_.js",
+      "_Select-DvCYUd5R.js",
+      "_Loader-miXIPUOC.js",
+      "_Input-BwuvaMEz.js",
       "_storage-DaJmYFgk.js"
     ]
   }
