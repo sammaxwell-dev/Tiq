@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Tippr - AI Translator",
+  "version": "0.0.1",
+  "description": "Instant AI translation helper",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html"
+  },
+  "options_page": "src/options/index.html",
+  "content_scripts": [
+    {
+      "js": [
+        "assets/index.tsx-loader-Bw_4nmJY.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "assets/Select-BkKUpfX4.js",
+        "assets/ContentApp-C9bfwsE3.js",
+        "assets/Loader-CkMbGed4.js",
+        "assets/storage-DaJmYFgk.js",
+        "assets/index.tsx-_jzmDvF-.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}

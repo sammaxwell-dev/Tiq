@@ -1,0 +1,103 @@
+{
+  "../../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-CnQycx2X.js",
+    "name": "crx-manifest.js",
+    "src": "../../../../@crx/manifest",
+    "isEntry": true
+  },
+  "_ContentApp-C9bfwsE3.js": {
+    "file": "assets/ContentApp-C9bfwsE3.js",
+    "name": "ContentApp",
+    "imports": [
+      "_Select-BkKUpfX4.js",
+      "_Loader-CkMbGed4.js",
+      "_storage-DaJmYFgk.js"
+    ]
+  },
+  "_Loader-CkMbGed4.js": {
+    "file": "assets/Loader-CkMbGed4.js",
+    "name": "Loader",
+    "imports": [
+      "_Select-BkKUpfX4.js"
+    ]
+  },
+  "_Select-BkKUpfX4.js": {
+    "file": "assets/Select-BkKUpfX4.js",
+    "name": "Select"
+  },
+  "_storage-DaJmYFgk.js": {
+    "file": "assets/storage-DaJmYFgk.js",
+    "name": "storage"
+  },
+  "_tailwind-!~{003}~.js": {
+    "file": "assets/tailwind-RYr22tEk.css",
+    "src": "_tailwind-!~{003}~.js"
+  },
+  "_tailwind-ClMCXLUx.js": {
+    "file": "assets/tailwind-ClMCXLUx.js",
+    "name": "tailwind",
+    "css": [
+      "assets/tailwind-RYr22tEk.css"
+    ]
+  },
+  "index.tsx-loader.js": {
+    "file": "assets/index.tsx-loader-Bw_4nmJY.js",
+    "src": "index.tsx-loader.js"
+  },
+  "playground.html": {
+    "file": "assets/playground-BBxTP_hH.js",
+    "name": "playground",
+    "src": "playground.html",
+    "isEntry": true,
+    "imports": [
+      "_tailwind-ClMCXLUx.js",
+      "_Select-BkKUpfX4.js",
+      "_ContentApp-C9bfwsE3.js",
+      "_Loader-CkMbGed4.js",
+      "_storage-DaJmYFgk.js"
+    ]
+  },
+  "src/background/index.ts": {
+    "file": "assets/index.ts-HHesQfLu.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true,
+    "imports": [
+      "_storage-DaJmYFgk.js"
+    ]
+  },
+  "src/content/index.tsx": {
+    "file": "assets/index.tsx-_jzmDvF-.js",
+    "name": "index.tsx",
+    "src": "src/content/index.tsx",
+    "isEntry": true,
+    "imports": [
+      "_Select-BkKUpfX4.js",
+      "_ContentApp-C9bfwsE3.js",
+      "_Loader-CkMbGed4.js",
+      "_storage-DaJmYFgk.js"
+    ]
+  },
+  "src/options/index.html": {
+    "file": "assets/index.html-DAPreHRl.js",
+    "name": "index.html",
+    "src": "src/options/index.html",
+    "isEntry": true,
+    "imports": [
+      "_tailwind-ClMCXLUx.js",
+      "_Select-BkKUpfX4.js",
+      "_storage-DaJmYFgk.js"
+    ]
+  },
+  "src/popup/index.html": {
+    "file": "assets/index.html-saG2RPHj.js",
+    "name": "index.html",
+    "src": "src/popup/index.html",
+    "isEntry": true,
+    "imports": [
+      "_tailwind-ClMCXLUx.js",
+      "_Select-BkKUpfX4.js",
+      "_Loader-CkMbGed4.js"
+    ]
+  }
+}
