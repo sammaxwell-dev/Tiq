@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import FloatingIcon from './FloatingIcon';
 import TranslationModal from './modal/TranslationModal';
+import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
 
 const ContentApp = () => {
   const [selection, setSelection] = useState<{ text: string; rect: DOMRect } | null>(null);
   const [isIconVisible, setIsIconVisible] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isInstantPopupVisible, setIsInstantPopupVisible] = useState(false);
+  const [iconClicked, setIconClicked] = useState(false);
   const [iconPos, setIconPos] = useState({ x: 0, y: 0 });
   const [instantTranslation, setInstantTranslation] = useState(false);
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
@@ -37,8 +40,8 @@ const ContentApp = () => {
     };
 
     const handleSelectionChange = () => {
-      // Don't show icon if user is still selecting or if modal is visible
-      if (isSelectingRef.current || isModalVisible) return;
+      // Don't show icon if user is still selecting or if any UI is visible or icon was clicked
+      if (isSelectingRef.current || isModalVisible || isInstantPopupVisible || iconClicked) return;
 
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || !sel.toString().trim()) {
@@ -161,7 +164,7 @@ const ContentApp = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isModalVisible]);
+  }, [isModalVisible, isInstantPopupVisible, iconClicked]);
 
   const handleIconClick = async () => {
     console.log('handleIconClick called', { selection, instantTranslation });
@@ -172,8 +175,9 @@ const ContentApp = () => {
     }
 
     setIsIconVisible(false);
+    setIconClicked(true);
 
-    // If instant translation is enabled, pre-translate the text
+    // If instant translation is enabled, translate and show popup
     if (instantTranslation) {
       try {
         // Check if extension context is valid
@@ -202,8 +206,10 @@ const ContentApp = () => {
 
         if (response && response.success) {
           setInitialTranslation(response.data);
+          setIsInstantPopupVisible(true);
         } else {
           setInitialTranslation(response?.error || 'Translation failed');
+          setIsModalVisible(true); // Fall back to modal on error
         }
       } catch (error: any) {
         console.error('Translation request error:', error);
@@ -214,36 +220,64 @@ const ContentApp = () => {
         } else {
           setInitialTranslation('Failed to communicate with extension. Please try again.');
         }
+        setIsModalVisible(true); // Fall back to modal on error
       }
     } else {
-      // No pre-translation - let the modal handle it when it opens
+      // No instant translation - show modal directly
       setInitialTranslation(undefined);
+      setIsModalVisible(true);
     }
-
-    // Always show the modal, with or without pre-translated content
-    setIsModalVisible(true);
   };
 
   const handleCloseModal = () => {
     setIsModalVisible(false);
+    setIconClicked(false);
     window.getSelection()?.removeAllRanges();
+  };
+
+  const handleCloseInstantPopup = () => {
+    setIsInstantPopupVisible(false);
+    setInitialTranslation(undefined);
+    setIconClicked(false);
+    window.getSelection()?.removeAllRanges();
+  };
+
+  const handleCopyTranslation = (translation: string) => {
+    // Optional: Could add a toast notification here
+    console.log('Translation copied:', translation);
+  };
+
+  
+  const handleOpenFullModal = () => {
+    setIsInstantPopupVisible(false);
+    setIsModalVisible(true);
   };
 
   return (
     <>
-      <FloatingIcon 
-        x={iconPos.x} 
-        y={iconPos.y} 
-        visible={isIconVisible} 
-        onClick={handleIconClick} 
+      <FloatingIcon
+        x={iconPos.x}
+        y={iconPos.y}
+        visible={isIconVisible && !iconClicked}
+        onClick={handleIconClick}
       />
-      
-      {selection && (
+
+      {selection && isModalVisible && (
         <TranslationModal
             visible={isModalVisible}
             initialText={selection.text}
             initialTranslation={initialTranslation}
             onClose={handleCloseModal}
+        />
+      )}
+
+      {selection && isInstantPopupVisible && initialTranslation && (
+        <InstantTranslationPopUp
+          translation={initialTranslation}
+          position={iconPos}
+          onClose={handleCloseInstantPopup}
+          onCopy={handleCopyTranslation}
+          onOpenModal={handleOpenFullModal}
         />
       )}
     </>
