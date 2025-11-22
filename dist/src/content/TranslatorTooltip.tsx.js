@@ -36,7 +36,6 @@ const TONE_ICONS = {
   casual: Coffee,
   humorous: Smile,
   code: Terminal,
-  code2: Terminal,
   tldr: Zap
 };
 const TranslatorTooltip = ({
@@ -127,7 +126,7 @@ const TranslatorTooltip = ({
               type: "button",
               children: /* @__PURE__ */ jsxDEV(Sparkles, { size: isMobile ? 20 : 18, strokeWidth: 2.5 }, void 0, false, {
                 fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                lineNumber: 158,
+                lineNumber: 157,
                 columnNumber: 11
               }, this)
             },
@@ -135,14 +134,14 @@ const TranslatorTooltip = ({
             false,
             {
               fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-              lineNumber: 146,
+              lineNumber: 145,
               columnNumber: 9
             },
             this
           ),
           /* @__PURE__ */ jsxDEV("div", { className: "w-px h-5 mx-1 bg-white/20" }, void 0, false, {
             fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-            lineNumber: 162,
+            lineNumber: 161,
             columnNumber: 9
           }, this),
           /* @__PURE__ */ jsxDEV(
@@ -162,23 +161,23 @@ const TranslatorTooltip = ({
               children: [
                 /* @__PURE__ */ jsxDEV(Languages, { size: isMobile ? 20 : 18, className: "text-white", strokeWidth: 2.5 }, void 0, false, {
                   fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                  lineNumber: 178,
+                  lineNumber: 177,
                   columnNumber: 11
                 }, this),
                 /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-1.5", children: [
                   /* @__PURE__ */ jsxDEV("span", { className: "w-1 h-1 rounded-full bg-white/50" }, void 0, false, {
                     fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                    lineNumber: 180,
+                    lineNumber: 179,
                     columnNumber: 13
                   }, this),
                   /* @__PURE__ */ jsxDEV(CurrentToneIcon, { size: 14, className: "text-white/80" }, void 0, false, {
                     fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                    lineNumber: 181,
+                    lineNumber: 180,
                     columnNumber: 13
                   }, this)
                 ] }, void 0, true, {
                   fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                  lineNumber: 179,
+                  lineNumber: 178,
                   columnNumber: 11
                 }, this)
               ]
@@ -187,7 +186,7 @@ const TranslatorTooltip = ({
             true,
             {
               fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-              lineNumber: 165,
+              lineNumber: 164,
               columnNumber: 9
             },
             this
@@ -222,7 +221,7 @@ const TranslatorTooltip = ({
                     false,
                     {
                       fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                      lineNumber: 204,
+                      lineNumber: 203,
                       columnNumber: 13
                     },
                     this
@@ -232,7 +231,7 @@ const TranslatorTooltip = ({
                 false,
                 {
                   fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                  lineNumber: 200,
+                  lineNumber: 199,
                   columnNumber: 11
                 },
                 this
@@ -242,7 +241,7 @@ const TranslatorTooltip = ({
             false,
             {
               fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-              lineNumber: 186,
+              lineNumber: 185,
               columnNumber: 9
             },
             this
@@ -254,11 +253,11 @@ const TranslatorTooltip = ({
               style: { marginTop: "-1px" },
               children: /* @__PURE__ */ jsxDEV("svg", { width: "12", height: "6", viewBox: "0 0 12 6", fill: "none", xmlns: "http://www.w3.org/2000/svg", className: "fill-[#11111198] drop-shadow-sm", children: /* @__PURE__ */ jsxDEV("path", { d: "M6 6L0 0H12L6 6Z" }, void 0, false, {
                 fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                lineNumber: 217,
+                lineNumber: 216,
                 columnNumber: 13
               }, this) }, void 0, false, {
                 fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                lineNumber: 216,
+                lineNumber: 215,
                 columnNumber: 11
               }, this)
             },
@@ -266,7 +265,7 @@ const TranslatorTooltip = ({
             false,
             {
               fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-              lineNumber: 212,
+              lineNumber: 211,
               columnNumber: 9
             },
             this
@@ -277,7 +276,7 @@ const TranslatorTooltip = ({
       true,
       {
         fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-        lineNumber: 130,
+        lineNumber: 129,
         columnNumber: 7
       },
       this
@@ -339,12 +338,12 @@ const TranslatorTooltip = ({
                   children: [
                     /* @__PURE__ */ jsxDEV(Icon, { size: 18, strokeWidth: 2, className: "text-white" }, void 0, false, {
                       fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                      lineNumber: 276,
+                      lineNumber: 275,
                       columnNumber: 21
                     }, this),
                     /* @__PURE__ */ jsxDEV("span", { className: "text-sm font-medium text-white", children: option.label }, void 0, false, {
                       fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                      lineNumber: 277,
+                      lineNumber: 276,
                       columnNumber: 21
                     }, this)
                   ]
@@ -353,7 +352,7 @@ const TranslatorTooltip = ({
                 true,
                 {
                   fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-                  lineNumber: 263,
+                  lineNumber: 262,
                   columnNumber: 19
                 },
                 this
@@ -363,7 +362,7 @@ const TranslatorTooltip = ({
             false,
             {
               fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-              lineNumber: 252,
+              lineNumber: 251,
               columnNumber: 15
             },
             this
@@ -374,18 +373,18 @@ const TranslatorTooltip = ({
       false,
       {
         fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-        lineNumber: 225,
+        lineNumber: 224,
         columnNumber: 9
       },
       this
     ) }, void 0, false, {
       fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-      lineNumber: 223,
+      lineNumber: 222,
       columnNumber: 7
     }, this)
   ] }, void 0, true, {
     fileName: "/Users/dwhitewolf/Desktop/Tiq/src/content/TranslatorTooltip.tsx",
-    lineNumber: 128,
+    lineNumber: 127,
     columnNumber: 5
   }, this);
 };
