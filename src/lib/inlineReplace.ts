@@ -219,6 +219,11 @@ export function animateTypewriter(
  * @param translationText The translated text to display
  * @returns Handle with restore function and cancel function
  */
+/**
+ * Main orchestrator: captures selection, replaces it, fetches translation, and animates
+ * @param translationText The translated text to display
+ * @returns Handle with restore function and cancel function
+ */
 export async function performInlineReplace(
   translationText: string
 ): Promise<{ restore: () => void; cancel: () => void } | null> {
@@ -229,16 +234,121 @@ export async function performInlineReplace(
     return null;
   }
 
-  const handle = replaceSelectionWithElement(selectionInfo);
+  // Create wrapper container
+  const container = document.createElement('span');
+  container.className = 'tiq-translation-container';
+  container.style.cssText = `
+    position: relative;
+    display: inline-block;
+    cursor: text;
+    vertical-align: top;
+  `;
+
+  // Create flag indicator
+  const flag = document.createElement('span');
+  flag.className = 'tiq-flag-indicator';
+  flag.contentEditable = 'false'; // Prevent editing the flag
+  flag.style.cssText = `
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    cursor: pointer;
+    vertical-align: middle;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    user-select: none;
+  `;
+
+  // Flag icon (using a simple flag SVG)
+  flag.innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+      <line x1="4" y1="22" x2="4" y2="15"></line>
+    </svg>
+  `;
+
+  // Hover effects for flag
+  flag.onmouseenter = () => {
+    flag.style.opacity = '1';
+    flag.style.transform = 'scale(1.1)';
+  };
+  flag.onmouseleave = () => {
+    flag.style.opacity = '0.6';
+    flag.style.transform = 'scale(1)';
+  };
+
+  // Create content span
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'tiq-translation-content';
+
+  // Apply computed styles from parent to content span
+  const styles = getComputedStyles(selectionInfo.containerElement);
+  Object.assign(contentSpan.style, {
+    fontSize: styles.fontSize,
+    fontFamily: styles.fontFamily,
+    fontWeight: styles.fontWeight,
+    fontStyle: styles.fontStyle,
+    color: styles.color,
+    lineHeight: styles.lineHeight,
+    letterSpacing: styles.letterSpacing,
+    display: 'inline',
+    margin: '0',
+    padding: '0',
+    border: 'none',
+    background: 'transparent',
+    whiteSpace: 'pre-wrap',
+  });
+
+  // Assemble container
+  container.appendChild(flag);
+  container.appendChild(contentSpan);
+
+  // Store original content for restoration
+  const { range } = selectionInfo;
+  const originalContent = range.cloneContents();
+  const originalText = selectionInfo.text;
+  const originalParent = range.startContainer.parentNode!;
+  const originalNextSibling = range.startContainer.nextSibling;
+
+  // Replace selection with container
+  range.deleteContents();
+  range.insertNode(container);
+
+  // Clear selection
+  window.getSelection()?.removeAllRanges();
+
   let cancelAnimation: (() => void) | null = null;
 
-  // Start typewriter animation
+  // Hover logic for peeking
+  flag.addEventListener('mouseenter', () => {
+    // Cancel animation if running
+    if (cancelAnimation) {
+      cancelAnimation();
+      cancelAnimation = null;
+    }
+    // Show original text instantly
+    contentSpan.textContent = originalText;
+    // Visual cue for peeking
+    contentSpan.style.opacity = '0.7';
+  });
+
+  flag.addEventListener('mouseleave', () => {
+    // Show translated text instantly (no animation)
+    contentSpan.textContent = translationText;
+    contentSpan.style.opacity = '1';
+  });
+
+  // Start initial typewriter animation
   cancelAnimation = animateTypewriter(
-    handle.element,
+    contentSpan,
     translationText,
-    20, // 20ms per character for smooth animation
+    20, // 20ms per character
     () => {
       console.log('Inline translation animation complete');
+      cancelAnimation = null;
     }
   );
 
@@ -247,7 +357,16 @@ export async function performInlineReplace(
       if (cancelAnimation) {
         cancelAnimation();
       }
-      handle.restore();
+      if (container.parentNode) {
+        container.parentNode.removeChild(container);
+
+        // Re-insert original content
+        if (originalNextSibling) {
+          originalParent.insertBefore(originalContent, originalNextSibling);
+        } else {
+          originalParent.appendChild(originalContent);
+        }
+      }
     },
     cancel: () => {
       if (cancelAnimation) {
