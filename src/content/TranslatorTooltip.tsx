@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Languages,
   ChevronDown,
-  Wand2,
+  Type,
   MessageSquareText,
   Briefcase,
   Coffee,
@@ -10,6 +10,7 @@ import {
   Terminal,
   Zap
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import { TranslationTone, TONE_OPTIONS } from '../types/tone';
 
@@ -109,7 +110,7 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
       <div
         ref={tooltipRef}
         className={cn(
-          'fixed z-[9999] flex items-center p-1 bg-white/90 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50',
+          'fixed z-[9999] flex items-center p-1 bg-[#11111198] backdrop-blur-sm rounded-full shadow-[0_0_20px_rgba(0,0,0,0.2)]',
           'animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out',
           'hover:shadow-2xl transition-all duration-300'
         )}
@@ -124,9 +125,8 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         {/* Inline Replace Button */}
         <button
           className={cn(
-            'flex items-center justify-center w-10 h-10 rounded-xl',
-            'bg-indigo-500 hover:bg-indigo-600 text-white',
-            'shadow-sm hover:shadow-md',
+            'flex items-center justify-center w-10 h-10 rounded-full',
+            'hover:bg-white/10 text-white',
             'transition-all duration-200 ease-out',
             'active:scale-90',
             isMobile ? 'w-12 h-12' : 'w-10 h-10'
@@ -135,18 +135,18 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           title="Replace inline"
           type="button"
         >
-          <Wand2 size={isMobile ? 20 : 18} strokeWidth={2.5} />
+          <Type size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Divider */}
-        <div className="w-px h-5 mx-1.5 bg-gray-200 dark:bg-gray-700" />
+        <div className="w-px h-5 mx-1 bg-white/20" />
 
         {/* Main Translate Button */}
         <button
           className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-xl',
-            'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'text-gray-700 dark:text-gray-200',
+            'flex items-center gap-2 px-3 py-2 rounded-full',
+            'hover:bg-white/10',
+            'text-white',
             'transition-all duration-200 ease-out',
             'active:scale-95',
             isMobile ? 'px-4 py-3' : 'px-3 py-2'
@@ -155,37 +155,37 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           title={`Translate (${currentToneOption.label})`}
           type="button"
         >
-          <Languages size={isMobile ? 20 : 18} className="text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
+          <Languages size={isMobile ? 20 : 18} className="text-white" strokeWidth={2.5} />
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold">Translate</span>
-            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
-            <CurrentToneIcon size={14} className="text-gray-500 dark:text-gray-400" />
+            <span className="w-1 h-1 rounded-full bg-white/50" />
+            <CurrentToneIcon size={14} className="text-white/80" />
           </div>
         </button>
 
         {/* Tone Selector Button */}
         <button
           className={cn(
-            'flex items-center justify-center w-8 h-8 ml-0.5 rounded-lg',
-            'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'text-gray-500 dark:text-gray-400',
+            'flex items-center justify-center w-8 h-8 ml-0.5 rounded-full',
+            'hover:bg-white/10',
+            'text-white/80',
             'transition-all duration-200',
             'active:scale-90',
-            isDropdownOpen && 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+            isDropdownOpen && 'bg-white/20 text-white',
             isMobile ? 'w-10 h-10' : 'w-8 h-8'
           )}
           onClick={handleToneToggle}
           title="Select tone"
           type="button"
         >
-          <ChevronDown
-            size={isMobile ? 18 : 16}
-            className={cn(
-              'transition-transform duration-300 ease-out',
-              isDropdownOpen && 'rotate-180'
-            )}
-            strokeWidth={2.5}
-          />
+          <motion.div
+            animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <ChevronDown
+              size={isMobile ? 18 : 16}
+              strokeWidth={2.5}
+            />
+          </motion.div>
         </button>
 
         {/* Arrow */}
@@ -193,90 +193,77 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           className="absolute left-1/2 -translate-x-1/2 top-full"
           style={{ marginTop: '-1px' }}
         >
-          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-white/90 dark:fill-gray-900/95 drop-shadow-sm">
+          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-[#11111198] drop-shadow-sm">
             <path d="M6 6L0 0H12L6 6Z" />
           </svg>
         </div>
       </div>
 
-      {/* Dropdown Menu */}
-      {isDropdownOpen && (
-        <div
-          ref={dropdownRef}
-          className={cn(
-            'fixed z-[10000] bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 p-2 min-w-[260px]',
-            'animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300 ease-out origin-top'
-          )}
-          style={{
-            left: `${x}px`,
-            top: `${y + 8}px`,
-            transform: 'translateX(-50%)',
-            pointerEvents: 'auto',
-          }}
-        >
-          <div className="px-3 py-2 mb-1">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-              Select Tone
-            </p>
-          </div>
-
-          <div className="grid gap-1">
-            {TONE_OPTIONS.map((option) => {
+      {/* Dropdown Menu - Floating Action Menu Style */}
+      <AnimatePresence>
+        {isDropdownOpen && (
+          <motion.div
+            ref={dropdownRef}
+            initial={{ opacity: 0, x: 10, y: 10, filter: "blur(10px)" }}
+            animate={{ opacity: 1, x: 0, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, x: 10, y: 10, filter: "blur(10px)" }}
+            transition={{
+              duration: 0.6,
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+              delay: 0.1,
+            }}
+            className="fixed z-[10000] flex flex-col items-end gap-2"
+            style={{
+              left: `${x}px`,
+              top: `${y + 16}px`, // Position below tooltip
+              transform: 'translateX(-50%)', // Centered relative to tooltip
+              x: "-50%", // Framer motion handles transform
+              pointerEvents: 'auto',
+              width: 'max-content',
+            }}
+          >
+            {TONE_OPTIONS.map((option, index) => {
               const Icon = TONE_ICONS[option.value] || MessageSquareText;
               const isSelected = selectedTone === option.value;
 
               return (
-                <button
+                <motion.div
                   key={option.value}
-                  className={cn(
-                    'group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800/80',
-                    'transition-all duration-200 ease-out',
-                    'text-left relative overflow-hidden',
-                    isSelected && 'bg-blue-50 dark:bg-blue-900/20'
-                  )}
-                  onClick={() => handleToneSelect(option.value)}
-                  type="button"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: index * 0.05,
+                  }}
+                  className="w-full flex justify-center"
                 >
-                  <div className={cn(
-                    'flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200',
-                    isSelected
-                      ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
-                      : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 group-hover:bg-white dark:group-hover:bg-gray-700 group-hover:text-gray-700 dark:group-hover:text-gray-200'
-                  )}>
-                    <Icon size={20} strokeWidth={2} />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={cn(
-                          'text-sm font-semibold',
-                          isSelected
-                            ? 'text-blue-700 dark:text-blue-300'
-                            : 'text-gray-700 dark:text-gray-200'
-                        )}
-                      >
-                        {option.label}
-                      </span>
-                    </div>
-                    <p className={cn(
-                      "text-xs mt-0.5 truncate",
-                      isSelected ? "text-blue-600/80 dark:text-blue-400/80" : "text-gray-500 dark:text-gray-400"
-                    )}>
-                      {option.description}
-                    </p>
-                  </div>
-
-                  {isSelected && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-500 dark:bg-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                  )}
-                </button>
+                  <button
+                    className={cn(
+                      'flex items-center gap-3 px-5 py-3 rounded-full',
+                      'bg-[#11111198] backdrop-blur-sm',
+                      'shadow-[0_0_20px_rgba(0,0,0,0.2)]',
+                      'hover:bg-[#111111d1]',
+                      'transition-all duration-200',
+                      'text-white border-none',
+                      isSelected && 'ring-2 ring-white/20 bg-[#111111d1]'
+                    )}
+                    onClick={() => handleToneSelect(option.value)}
+                    type="button"
+                  >
+                    <Icon size={18} strokeWidth={2} className="text-white" />
+                    <span className="text-sm font-medium text-white">
+                      {option.label}
+                    </span>
+                  </button>
+                </motion.div>
               );
             })}
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
