@@ -29,6 +29,7 @@ const TONE_ICONS: Record<TranslationTone, React.ElementType> = {
   casual: Coffee,
   humorous: Smile,
   code: Terminal,
+  code2: Terminal,
   tldr: Zap,
 };
 
