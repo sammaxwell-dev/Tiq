@@ -5,8 +5,8 @@
     "src": "../../../../@crx/manifest",
     "isEntry": true
   },
-  "_ContentApp-CGUNwen9.js": {
-    "file": "assets/ContentApp-CGUNwen9.js",
+  "_ContentApp-Be4PkP3u.js": {
+    "file": "assets/ContentApp-Be4PkP3u.js",
     "name": "ContentApp",
     "imports": [
       "_Select-DVHqK8Ie.js",
@@ -48,18 +48,18 @@
     ]
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-BHIoFMNz.js",
+    "file": "assets/index.tsx-loader-lssoX76c.js",
     "src": "index.tsx-loader.js"
   },
   "playground.html": {
-    "file": "assets/playground-BFmXk1_G.js",
+    "file": "assets/playground-sOmNegHa.js",
     "name": "playground",
     "src": "playground.html",
     "isEntry": true,
     "imports": [
       "_tailwind-BBZgbfrI.js",
       "_Select-DVHqK8Ie.js",
-      "_ContentApp-CGUNwen9.js",
+      "_ContentApp-Be4PkP3u.js",
       "_storage-CmcN9rvR.js",
       "_Loader-B7UvaqpD.js"
     ]
@@ -74,13 +74,13 @@
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-Dfu_jok9.js",
+    "file": "assets/index.tsx-CQHhKzKd.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
       "_Select-DVHqK8Ie.js",
-      "_ContentApp-CGUNwen9.js",
+      "_ContentApp-Be4PkP3u.js",
       "_storage-CmcN9rvR.js",
       "_Loader-B7UvaqpD.js"
     ]

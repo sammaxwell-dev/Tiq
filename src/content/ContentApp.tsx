@@ -84,12 +84,12 @@ const ContentApp = () => {
           setSelection({ text, rect });
 
           // PRECISE POSITIONING: Calculate tooltip position above selection
-          // Account for scroll position using window.scrollY and window.scrollX
-          const x = rect.left + (rect.width / 2) + window.scrollX; // Center horizontally
-          const y = rect.top + window.scrollY; // Top of selection + scroll offset
+          // For position: fixed, we use viewport coordinates (NO scroll offset needed)
+          const x = rect.left + (rect.width / 2); // Center horizontally
+          const y = rect.top; // Top of selection in viewport
 
           setTooltipPos({ x, y });
-          console.log('Setting tooltip visible at position:', { x, y, scrollY: window.scrollY });
+          console.log('Setting tooltip visible at position:', { x, y });
           setIsTooltipVisible(true);
         } catch (error) {
           console.error('Error positioning tooltip:', error);
