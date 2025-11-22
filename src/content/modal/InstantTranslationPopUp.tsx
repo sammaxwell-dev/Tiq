@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Copy, Maximize2, Move } from 'lucide-react';
+import { X, Copy, Maximize2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { cn } from '../../lib/utils';
 
@@ -136,7 +136,7 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
     <div
       ref={popupRef}
       className={cn(
-        "fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-[320px] max-w-[400px] select-none",
+        "fixed z-50 bg-[#11111198] backdrop-blur-xl rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.3)] border border-white/10 p-4 min-w-[320px] max-w-[400px] select-none",
         !isDragging && "transition-all duration-200 ease-in-out",
         isVisible
           ? "opacity-100 scale-100"
@@ -154,24 +154,22 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
       {/* Header with close button */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Move className="h-3 w-3 text-gray-400" />
-          <div className="text-sm font-medium text-gray-700">
-            Translation
-          </div>
+
+
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
+          className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10 rounded-full"
         >
           <X className="h-3 w-3" />
         </Button>
       </div>
 
       {/* Translation */}
-      <div className="mb-4 max-h-32 overflow-y-auto">
-        <div className="text-sm text-gray-900 leading-relaxed">
+      <div className="mb-4 max-h-32 overflow-y-auto custom-scrollbar">
+        <div className="text-sm text-white/90 leading-relaxed font-medium">
           {translation}
         </div>
       </div>
@@ -182,9 +180,9 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
           variant="outline"
           size="sm"
           onClick={handleCopy}
-          className="flex-1 text-xs"
+          className="flex-1 text-xs bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-200"
         >
-          <Copy className="h-3 w-3 mr-1" />
+          <Copy className="h-3 w-3 mr-1.5" />
           Copy
         </Button>
 
@@ -192,10 +190,10 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
           variant="outline"
           size="sm"
           onClick={onOpenModal}
-          className="flex-1 text-xs"
+          className="flex-1 text-xs bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-200"
         >
-          <Maximize2 className="h-3 w-3 mr-1" />
-          Full
+          <Maximize2 className="h-3 w-3 mr-1.5" />
+          Full View
         </Button>
       </div>
     </div>
