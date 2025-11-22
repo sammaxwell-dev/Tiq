@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.tsx-loader-lssoX76c.js"
+        "assets/index.tsx-loader-DyvhVU_A.js"
       ],
       "matches": [
         "<all_urls>"
@@ -33,10 +33,10 @@
       "resources": [
         "src/assets/*.png",
         "assets/Select-DVHqK8Ie.js",
-        "assets/ContentApp-Be4PkP3u.js",
+        "assets/ContentApp-BJBoc_I-.js",
         "assets/storage-CmcN9rvR.js",
         "assets/Loader-B7UvaqpD.js",
-        "assets/index.tsx-CQHhKzKd.js"
+        "assets/index.tsx-vdGnAt1I.js"
       ],
       "use_dynamic_url": false
     }
