@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Languages,
   ChevronDown,
-  Type,
+  Sparkles,
   MessageSquareText,
   Briefcase,
   Coffee,
@@ -135,7 +135,7 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           title="Replace inline"
           type="button"
         >
-          <Type size={isMobile ? 20 : 18} strokeWidth={2.5} />
+          <Sparkles size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Divider */}

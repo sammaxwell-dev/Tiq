@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import TranslatorTooltip from './TranslatorTooltip';
-import TranslationModal from './modal/TranslationModal';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
@@ -9,11 +8,9 @@ import { TranslationTone } from '../types/tone';
 const ContentApp = () => {
   const [selection, setSelection] = useState<{ text: string; rect: DOMRect } | null>(null);
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInstantPopupVisible, setIsInstantPopupVisible] = useState(false);
   const [tooltipClicked, setTooltipClicked] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const [instantTranslation, setInstantTranslation] = useState(false);
   const [selectedTone, setSelectedTone] = useState<TranslationTone>('standard');
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -21,7 +18,6 @@ const ContentApp = () => {
 
   useEffect(() => {
     storage.get().then(settings => {
-      setInstantTranslation(settings.instantTranslation);
       if (settings.translationTone) {
         setSelectedTone(settings.translationTone);
       }
@@ -54,7 +50,7 @@ const ContentApp = () => {
 
     const handleSelectionChange = () => {
       // Don't show tooltip if user is still selecting or if any UI is visible or tooltip was clicked
-      if (isSelectingRef.current || isModalVisible || isInstantPopupVisible || tooltipClicked) return;
+      if (isSelectingRef.current || isInstantPopupVisible || tooltipClicked) return;
 
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed || !sel.toString().trim()) {
@@ -71,10 +67,10 @@ const ContentApp = () => {
 
           // Check if selection is visible in viewport
           const isVisible = rect.width > 0 && rect.height > 0 &&
-                           rect.top < window.innerHeight &&
-                           rect.bottom > 0 &&
-                           rect.left < window.innerWidth &&
-                           rect.right > 0;
+            rect.top < window.innerHeight &&
+            rect.bottom > 0 &&
+            rect.left < window.innerWidth &&
+            rect.right > 0;
 
           if (!isVisible) {
             setIsTooltipVisible(false);
@@ -114,10 +110,10 @@ const ContentApp = () => {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [isModalVisible, isInstantPopupVisible, tooltipClicked]);
+  }, [isInstantPopupVisible, tooltipClicked]);
 
   const handleTranslate = async (mode: 'modal' | 'inline') => {
-    console.log('handleTranslate called', { mode, selection, instantTranslation, selectedTone });
+    console.log('handleTranslate called', { mode, selection, selectedTone });
 
     if (!selection) {
       console.log('No selection, returning');
@@ -131,62 +127,55 @@ const ContentApp = () => {
       // Handle inline replacement
       await handleInlineTranslation();
     } else {
-      // Handle modal translation
+      // Handle modal translation (now just instant popup)
       await handleModalTranslation();
     }
   };
 
   const handleModalTranslation = async () => {
-    // If instant translation is enabled, translate and show popup
-    if (instantTranslation) {
-      try {
-        // Check if extension context is valid
-        if (!chrome.runtime?.id) {
-          setInitialTranslation('Extension reloading, please refresh the page');
-          setIsModalVisible(true);
-          return;
-        }
-
-        const settings = await storage.get();
-
-        // Add timeout for message response
-        const messagePromise = chrome.runtime.sendMessage({
-          type: 'TRANSLATE_REQUEST',
-          payload: {
-            text: selection!.text,
-            targetLang: settings.targetLang,
-            tone: selectedTone,
-          }
-        });
-
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Request timeout')), 30000); // 30 second timeout
-        });
-
-        const response = await Promise.race([messagePromise, timeoutPromise]);
-
-        if (response && response.success) {
-          setInitialTranslation(response.data);
-          setIsInstantPopupVisible(true);
-        } else {
-          setInitialTranslation(response?.error || 'Translation failed');
-          setIsModalVisible(true); // Fall back to modal on error
-        }
-      } catch (error: any) {
-        console.error('Translation request error:', error);
-        if (error.message === 'Request timeout') {
-          setInitialTranslation('Translation request timed out. Please try again.');
-        } else if (error.message?.includes('Extension context invalidated')) {
-          setInitialTranslation('Extension reloaded. Please refresh the page and try again.');
-        } else {
-          setInitialTranslation('Failed to communicate with extension. Please try again.');
-        }
-        setIsModalVisible(true); // Fall back to modal on error
+    try {
+      // Check if extension context is valid
+      if (!chrome.runtime?.id) {
+        setInitialTranslation('Extension reloading, please refresh the page');
+        setIsInstantPopupVisible(true);
+        return;
       }
-    } else {
-      // No instant translation - show modal directly
-      setInitialTranslation(undefined);
-      setIsModalVisible(true);
+
+      const settings = await storage.get();
+
+      // Add timeout for message response
+      const messagePromise = chrome.runtime.sendMessage({
+        type: 'TRANSLATE_REQUEST',
+        payload: {
+          text: selection!.text,
+          targetLang: settings.targetLang,
+          tone: selectedTone,
+        }
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 30000); // 30 second timeout
+      });
+
+      const response = await Promise.race([messagePromise, timeoutPromise]);
+
+      if (response && response.success) {
+        setInitialTranslation(response.data);
+        setIsInstantPopupVisible(true);
+      } else {
+        setInitialTranslation(response?.error || 'Translation failed');
+        setIsInstantPopupVisible(true);
+      }
+    } catch (error: any) {
+      console.error('Translation request error:', error);
+      if (error.message === 'Request timeout') {
+        setInitialTranslation('Translation request timed out. Please try again.');
+      } else if (error.message?.includes('Extension context invalidated')) {
+        setInitialTranslation('Extension reloaded. Please refresh the page and try again.');
+      } else {
+        setInitialTranslation('Failed to communicate with extension. Please try again.');
+      }
+      setIsInstantPopupVisible(true);
     }
   };
 
@@ -255,12 +244,6 @@ const ContentApp = () => {
     console.log('Tone changed to:', tone);
   };
 
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-    setTooltipClicked(false);
-    window.getSelection()?.removeAllRanges();
-  };
-
   const handleCloseInstantPopup = () => {
     setIsInstantPopupVisible(false);
     setInitialTranslation(undefined);
@@ -271,12 +254,6 @@ const ContentApp = () => {
   const handleCopyTranslation = (translation: string) => {
     // Optional: Could add a toast notification here
     console.log('Translation copied:', translation);
-  };
-
-  
-  const handleOpenFullModal = () => {
-    setIsInstantPopupVisible(false);
-    setIsModalVisible(true);
   };
 
   return (
@@ -290,22 +267,12 @@ const ContentApp = () => {
         onToneChange={handleToneChange}
       />
 
-      {selection && isModalVisible && (
-        <TranslationModal
-            visible={isModalVisible}
-            initialText={selection.text}
-            initialTranslation={initialTranslation}
-            onClose={handleCloseModal}
-        />
-      )}
-
       {selection && isInstantPopupVisible && initialTranslation && (
         <InstantTranslationPopUp
           translation={initialTranslation}
           position={tooltipPos}
           onClose={handleCloseInstantPopup}
           onCopy={handleCopyTranslation}
-          onOpenModal={handleOpenFullModal}
         />
       )}
     </>

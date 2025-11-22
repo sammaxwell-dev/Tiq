@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.tsx-loader-2K7LBKIl.js"
+        "assets/index.tsx-loader-DrMxgeNI.js"
       ],
       "matches": [
         "<all_urls>"
@@ -32,11 +32,11 @@
       ],
       "resources": [
         "src/assets/*.png",
-        "assets/Select-DVHqK8Ie.js",
-        "assets/ContentApp-BUY0OEem.js",
+        "assets/Button-Dlz1g6dN.js",
+        "assets/ContentApp-D9FucfNV.js",
         "assets/storage-CmcN9rvR.js",
-        "assets/Loader-B7UvaqpD.js",
-        "assets/index.tsx-lbq8Xy8s.js"
+        "assets/sparkles-BSOUj1E2.js",
+        "assets/index.tsx-BmC6eezV.js"
       ],
       "use_dynamic_url": false
     }

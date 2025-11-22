@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Copy, Maximize2 } from 'lucide-react';
+import { X, Copy, Move } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { cn } from '../../lib/utils';
 
@@ -8,7 +8,6 @@ interface InstantTranslationPopUpProps {
   position: { x: number; y: number };
   onClose: () => void;
   onCopy: (translation: string) => void;
-  onOpenModal: () => void;
 }
 
 export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = ({
@@ -16,7 +15,6 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
   position,
   onClose,
   onCopy,
-  onOpenModal,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -154,8 +152,10 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
       {/* Header with close button */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-
-
+          <Move className="h-3 w-3 text-white/40" />
+          <div className="text-sm font-medium text-white/90">
+            Translation
+          </div>
         </div>
         <Button
           variant="ghost"
@@ -184,16 +184,6 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
         >
           <Copy className="h-3 w-3 mr-1.5" />
           Copy
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onOpenModal}
-          className="flex-1 text-xs bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-200"
-        >
-          <Maximize2 className="h-3 w-3 mr-1.5" />
-          Full View
         </Button>
       </div>
     </div>
