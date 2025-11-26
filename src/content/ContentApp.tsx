@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import TranslatorTooltip, { ExplainType } from './TranslatorTooltip';
+import TranslatorTooltip, { ExplainType, TranslateMode } from './TranslatorTooltip';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
@@ -11,8 +11,18 @@ const ContentApp = () => {
   const [tooltipClicked, setTooltipClicked] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
+  const [translateMode, setTranslateMode] = useState<TranslateMode>('inline');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingRef = useRef(false);
+
+  // Load translate mode from storage on mount
+  useEffect(() => {
+    storage.get().then(settings => {
+      if (settings.translateMode) {
+        setTranslateMode(settings.translateMode);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const handleMouseDown = () => {
@@ -223,8 +233,13 @@ const ContentApp = () => {
   };
 
   const handleCopyTranslation = (translation: string) => {
-    // Optional: Could add a toast notification here
     console.log('Translation copied:', translation);
+  };
+
+  const handleTranslateModeChange = async (mode: TranslateMode) => {
+    setTranslateMode(mode);
+    await storage.set({ translateMode: mode });
+    console.log('Translate mode changed to:', mode);
   };
 
   const handleExplain = async (type: ExplainType) => {
@@ -289,7 +304,9 @@ const ContentApp = () => {
         x={tooltipPos.x}
         y={tooltipPos.y}
         visible={isTooltipVisible && !tooltipClicked}
+        translateMode={translateMode}
         onTranslate={handleTranslate}
+        onTranslateModeChange={handleTranslateModeChange}
         onExplain={handleExplain}
       />
 

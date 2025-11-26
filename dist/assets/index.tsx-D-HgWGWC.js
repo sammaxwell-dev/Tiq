@@ -1,1 +1,0 @@
-import{a as e,j as t}from"./Button-n05jE9QT.js";import{S as n,C as r}from"./ContentApp-BrPtLOrt.js";import"./storage-CmcN9rvR.js";import"./sparkles-BATY_21l.js";console.log("Tippr content script loaded");const o=document.createElement("div");o.id="tippr-container";document.body.appendChild(o);const i=e(o);i.render(t.jsx(n,{children:t.jsx(r,{})}));

@@ -1,5 +1,7 @@
 import { TranslationTone } from '../types/tone';
 
+export type TranslateMode = 'modal' | 'inline';
+
 export interface AppSettings {
   apiKey: string;
   targetLang: string;
@@ -8,6 +10,7 @@ export interface AppSettings {
   showBackdrop: boolean;
   instantTranslation: boolean;
   translationTone: TranslationTone;
+  translateMode: TranslateMode;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -18,6 +21,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   showBackdrop: false,
   instantTranslation: false,
   translationTone: 'standard',
+  translateMode: 'inline',
 };
 
 export const storage = {
