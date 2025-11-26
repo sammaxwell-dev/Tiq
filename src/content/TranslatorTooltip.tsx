@@ -1,79 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   Languages,
-  ChevronDown,
   Sparkles,
-  MessageSquareText,
-  Briefcase,
-  Coffee,
-  Smile,
-  Terminal,
-  Zap
+  Baby,
+  BookOpen
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
-import { TranslationTone, TONE_OPTIONS } from '../types/tone';
+
+export type ExplainType = 'eli5' | 'define';
 
 interface TranslatorTooltipProps {
   x: number;
   y: number;
   visible: boolean;
-  selectedTone: TranslationTone;
   onTranslate: (mode: 'modal' | 'inline') => void;
-  onToneChange: (tone: TranslationTone) => void;
+  onExplain?: (type: ExplainType) => void;
 }
-
-const TONE_ICONS: Record<TranslationTone, React.ElementType> = {
-  standard: MessageSquareText,
-  formal: Briefcase,
-  casual: Coffee,
-  humorous: Smile,
-  code: Terminal,
-  tldr: Zap,
-};
 
 const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
   x,
   y,
   visible,
-  selectedTone,
   onTranslate,
-  onToneChange,
+  onExplain,
 }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        tooltipRef.current &&
-        !tooltipRef.current.contains(e.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-
-    if (isDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isDropdownOpen]);
-
-  // Reset dropdown when tooltip becomes invisible
-  useEffect(() => {
-    if (!visible) {
-      setIsDropdownOpen(false);
-    }
-  }, [visible]);
 
   if (!visible) return null;
 
-  const currentToneOption = TONE_OPTIONS.find((opt) => opt.value === selectedTone) || TONE_OPTIONS[0];
-  const CurrentToneIcon = TONE_ICONS[selectedTone] || MessageSquareText;
   const isMobile = window.innerWidth < 640;
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -93,15 +47,16 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
     onTranslate('inline');
   };
 
-  const handleToneToggle = (e: React.MouseEvent) => {
+  const handleExplainEli5 = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDropdownOpen(!isDropdownOpen);
+    onExplain?.('eli5');
   };
 
-  const handleToneSelect = (tone: TranslationTone) => {
-    onToneChange(tone);
-    setIsDropdownOpen(false);
+  const handleExplainDefine = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onExplain?.('define');
   };
 
   return (
@@ -144,48 +99,52 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         {/* Main Translate Button */}
         <button
           className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-full',
-            'hover:bg-white/10',
-            'text-white',
+            'flex items-center justify-center w-10 h-10 rounded-full',
+            'hover:bg-white/10 text-white',
             'transition-all duration-200 ease-out',
-            'active:scale-95',
-            isMobile ? 'px-4 py-3' : 'px-3 py-2'
+            'active:scale-90',
+            isMobile ? 'w-12 h-12' : 'w-10 h-10'
           )}
           onClick={handleTranslateClick}
-          title={`Translate (${currentToneOption.label})`}
+          title="Translate"
           type="button"
         >
-          <Languages size={isMobile ? 20 : 18} className="text-white" strokeWidth={2.5} />
-          <div className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-white/50" />
-            <CurrentToneIcon size={14} className="text-white/80" />
-          </div>
+          <Languages size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
-        {/* Tone Selector Button */}
+        {/* Divider */}
+        <div className="w-px h-5 mx-1 bg-white/20" />
+
+        {/* Explain ELI5 Button */}
         <button
           className={cn(
-            'flex items-center justify-center w-8 h-8 ml-0.5 rounded-full',
-            'hover:bg-white/10',
-            'text-white/80',
-            'transition-all duration-200',
+            'flex items-center justify-center w-10 h-10 rounded-full',
+            'hover:bg-white/10 text-white',
+            'transition-all duration-200 ease-out',
             'active:scale-90',
-            isDropdownOpen && 'bg-white/20 text-white',
-            isMobile ? 'w-10 h-10' : 'w-8 h-8'
+            isMobile ? 'w-12 h-12' : 'w-10 h-10'
           )}
-          onClick={handleToneToggle}
-          title="Select tone"
+          onClick={handleExplainEli5}
+          title="Explain like I'm 5"
           type="button"
         >
-          <motion.div
-            animate={{ rotate: isDropdownOpen ? 180 : 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <ChevronDown
-              size={isMobile ? 18 : 16}
-              strokeWidth={2.5}
-            />
-          </motion.div>
+          <Baby size={isMobile ? 20 : 18} strokeWidth={2.5} />
+        </button>
+
+        {/* Explain Define Button */}
+        <button
+          className={cn(
+            'flex items-center justify-center w-10 h-10 rounded-full',
+            'hover:bg-white/10 text-white',
+            'transition-all duration-200 ease-out',
+            'active:scale-90',
+            isMobile ? 'w-12 h-12' : 'w-10 h-10'
+          )}
+          onClick={handleExplainDefine}
+          title="Define term"
+          type="button"
+        >
+          <BookOpen size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Arrow */}
@@ -198,72 +157,6 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           </svg>
         </div>
       </div>
-
-      {/* Dropdown Menu - Floating Action Menu Style */}
-      <AnimatePresence>
-        {isDropdownOpen && (
-          <motion.div
-            ref={dropdownRef}
-            initial={{ opacity: 0, x: 10, y: 10, filter: "blur(10px)" }}
-            animate={{ opacity: 1, x: 0, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, x: 10, y: 10, filter: "blur(10px)" }}
-            transition={{
-              duration: 0.6,
-              type: "spring",
-              stiffness: 300,
-              damping: 20,
-              delay: 0.1,
-            }}
-            className="fixed z-[10000] flex flex-col items-end gap-2"
-            style={{
-              left: `${x}px`,
-              top: `${y + 16}px`, // Position below tooltip
-              transform: 'translateX(-50%)', // Centered relative to tooltip
-              x: "-50%", // Framer motion handles transform
-              pointerEvents: 'auto',
-              width: 'max-content',
-            }}
-          >
-            {TONE_OPTIONS.map((option, index) => {
-              const Icon = TONE_ICONS[option.value] || MessageSquareText;
-              const isSelected = selectedTone === option.value;
-
-              return (
-                <motion.div
-                  key={option.value}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{
-                    duration: 0.3,
-                    delay: index * 0.05,
-                  }}
-                  className="w-full flex justify-center"
-                >
-                  <button
-                    className={cn(
-                      'flex items-center gap-3 px-5 py-3 rounded-full',
-                      'bg-[#11111198] backdrop-blur-sm',
-                      'shadow-[0_0_20px_rgba(0,0,0,0.2)]',
-                      'hover:bg-[#111111d1]',
-                      'transition-all duration-200',
-                      'text-white border-none',
-                      isSelected && 'ring-2 ring-white/20 bg-[#111111d1]'
-                    )}
-                    onClick={() => handleToneSelect(option.value)}
-                    type="button"
-                  >
-                    <Icon size={18} strokeWidth={2} className="text-white" />
-                    <span className="text-sm font-medium text-white">
-                      {option.label}
-                    </span>
-                  </button>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 };

@@ -5,31 +5,31 @@
     "src": "../../../../@crx/manifest",
     "isEntry": true
   },
-  "_Button-Dlz1g6dN.js": {
-    "file": "assets/Button-Dlz1g6dN.js",
+  "_Button-n05jE9QT.js": {
+    "file": "assets/Button-n05jE9QT.js",
     "name": "Button"
   },
-  "_ContentApp-DvKWAF00.js": {
-    "file": "assets/ContentApp-DvKWAF00.js",
+  "_ContentApp-BrPtLOrt.js": {
+    "file": "assets/ContentApp-BrPtLOrt.js",
     "name": "ContentApp",
     "imports": [
-      "_Button-Dlz1g6dN.js",
+      "_Button-n05jE9QT.js",
       "_storage-CmcN9rvR.js",
-      "_sparkles-BSOUj1E2.js"
+      "_sparkles-BATY_21l.js"
     ]
   },
-  "_Input-DldoxaWi.js": {
-    "file": "assets/Input-DldoxaWi.js",
+  "_Input-CE70QjoX.js": {
+    "file": "assets/Input-CE70QjoX.js",
     "name": "Input",
     "imports": [
-      "_Button-Dlz1g6dN.js"
+      "_Button-n05jE9QT.js"
     ]
   },
-  "_sparkles-BSOUj1E2.js": {
-    "file": "assets/sparkles-BSOUj1E2.js",
+  "_sparkles-BATY_21l.js": {
+    "file": "assets/sparkles-BATY_21l.js",
     "name": "sparkles",
     "imports": [
-      "_Button-Dlz1g6dN.js"
+      "_Button-n05jE9QT.js"
     ]
   },
   "_storage-CmcN9rvR.js": {
@@ -37,31 +37,31 @@
     "name": "storage"
   },
   "_tailwind-!~{003}~.js": {
-    "file": "assets/tailwind-BK48uCA0.css",
+    "file": "assets/tailwind-BYVJiAb5.css",
     "src": "_tailwind-!~{003}~.js"
   },
-  "_tailwind-reuZ4oQV.js": {
-    "file": "assets/tailwind-reuZ4oQV.js",
+  "_tailwind-ChHFlVms.js": {
+    "file": "assets/tailwind-ChHFlVms.js",
     "name": "tailwind",
     "css": [
-      "assets/tailwind-BK48uCA0.css"
+      "assets/tailwind-BYVJiAb5.css"
     ]
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-ukv6mBgA.js",
+    "file": "assets/index.tsx-loader-Dx8r9zS1.js",
     "src": "index.tsx-loader.js"
   },
   "playground.html": {
-    "file": "assets/playground-Cm6CCwcn.js",
+    "file": "assets/playground-DCEgu3Nx.js",
     "name": "playground",
     "src": "playground.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-reuZ4oQV.js",
-      "_Button-Dlz1g6dN.js",
-      "_ContentApp-DvKWAF00.js",
+      "_tailwind-ChHFlVms.js",
+      "_Button-n05jE9QT.js",
+      "_ContentApp-BrPtLOrt.js",
       "_storage-CmcN9rvR.js",
-      "_sparkles-BSOUj1E2.js"
+      "_sparkles-BATY_21l.js"
     ]
   },
   "src/background/index.ts": {
@@ -74,39 +74,39 @@
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-B6UdMv9A.js",
+    "file": "assets/index.tsx-D-HgWGWC.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
-      "_Button-Dlz1g6dN.js",
-      "_ContentApp-DvKWAF00.js",
+      "_Button-n05jE9QT.js",
+      "_ContentApp-BrPtLOrt.js",
       "_storage-CmcN9rvR.js",
-      "_sparkles-BSOUj1E2.js"
+      "_sparkles-BATY_21l.js"
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-BpaOQyrX.js",
+    "file": "assets/index.html-hlA7VWeK.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-reuZ4oQV.js",
-      "_Button-Dlz1g6dN.js",
-      "_Input-DldoxaWi.js",
+      "_tailwind-ChHFlVms.js",
+      "_Button-n05jE9QT.js",
+      "_Input-CE70QjoX.js",
       "_storage-CmcN9rvR.js"
     ]
   },
   "src/popup/index.html": {
-    "file": "assets/index.html-C0ojET5v.js",
+    "file": "assets/index.html-D7Wv5PgZ.js",
     "name": "index.html",
     "src": "src/popup/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-reuZ4oQV.js",
-      "_Button-Dlz1g6dN.js",
-      "_Input-DldoxaWi.js",
-      "_sparkles-BSOUj1E2.js",
+      "_tailwind-ChHFlVms.js",
+      "_Button-n05jE9QT.js",
+      "_Input-CE70QjoX.js",
+      "_sparkles-BATY_21l.js",
       "_storage-CmcN9rvR.js"
     ]
   }

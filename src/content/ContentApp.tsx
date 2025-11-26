@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import TranslatorTooltip from './TranslatorTooltip';
+import TranslatorTooltip, { ExplainType } from './TranslatorTooltip';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
 import { storage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
-import { TranslationTone } from '../types/tone';
 
 const ContentApp = () => {
   const [selection, setSelection] = useState<{ text: string; rect: DOMRect } | null>(null);
@@ -11,18 +10,9 @@ const ContentApp = () => {
   const [isInstantPopupVisible, setIsInstantPopupVisible] = useState(false);
   const [tooltipClicked, setTooltipClicked] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const [selectedTone, setSelectedTone] = useState<TranslationTone>('standard');
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingRef = useRef(false);
-
-  useEffect(() => {
-    storage.get().then(settings => {
-      if (settings.translationTone) {
-        setSelectedTone(settings.translationTone);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     const handleMouseDown = () => {
@@ -113,7 +103,7 @@ const ContentApp = () => {
   }, [isInstantPopupVisible, tooltipClicked]);
 
   const handleTranslate = async (mode: 'modal' | 'inline') => {
-    console.log('handleTranslate called', { mode, selection, selectedTone });
+    console.log('handleTranslate called', { mode, selection });
 
     if (!selection) {
       console.log('No selection, returning');
@@ -124,17 +114,14 @@ const ContentApp = () => {
     setTooltipClicked(true);
 
     if (mode === 'inline') {
-      // Handle inline replacement
       await handleInlineTranslation();
     } else {
-      // Handle modal translation (now just instant popup)
       await handleModalTranslation();
     }
   };
 
   const handleModalTranslation = async () => {
     try {
-      // Check if extension context is valid
       if (!chrome.runtime?.id) {
         setInitialTranslation('Extension reloading, please refresh the page');
         setIsInstantPopupVisible(true);
@@ -143,18 +130,16 @@ const ContentApp = () => {
 
       const settings = await storage.get();
 
-      // Add timeout for message response
       const messagePromise = chrome.runtime.sendMessage({
         type: 'TRANSLATE_REQUEST',
         payload: {
           text: selection!.text,
           targetLang: settings.targetLang,
-          tone: selectedTone,
         }
       });
 
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 30000); // 30 second timeout
+        setTimeout(() => reject(new Error('Request timeout')), 30000);
       });
 
       const response = await Promise.race([messagePromise, timeoutPromise]);
@@ -181,7 +166,6 @@ const ContentApp = () => {
 
   const handleInlineTranslation = async () => {
     try {
-      // Check if extension context is valid
       if (!chrome.runtime?.id) {
         console.error('Extension context invalid');
         alert('Extension reloading, please refresh the page');
@@ -191,14 +175,12 @@ const ContentApp = () => {
 
       const settings = await storage.get();
 
-      // Request translation with inline context and tone
       const messagePromise = chrome.runtime.sendMessage({
         type: 'TRANSLATE_REQUEST',
         payload: {
           text: selection!.text,
           targetLang: settings.targetLang,
-          context: 'inline-replace', // Special context for inline mode
-          tone: selectedTone,
+          context: 'inline-replace',
         }
       });
 
@@ -209,13 +191,10 @@ const ContentApp = () => {
       const response = await Promise.race([messagePromise, timeoutPromise]);
 
       if (response && response.success) {
-        // Perform inline replacement with typewriter animation
         const result = await performInlineReplace(response.data, settings.targetLang);
 
         if (result) {
           console.log('Inline replacement successful');
-          // Optionally store restore function for undo feature
-          // For now, the replacement is permanent after animation completes
         }
       } else {
         console.error('Translation failed:', response?.error);
@@ -230,18 +209,10 @@ const ContentApp = () => {
       }
     } finally {
       setTooltipClicked(false);
-      // Don't clear selection immediately to allow for inline replacement
       setTimeout(() => {
         window.getSelection()?.removeAllRanges();
       }, 500);
     }
-  };
-
-  const handleToneChange = async (tone: TranslationTone) => {
-    setSelectedTone(tone);
-    // Save to storage for persistence
-    await storage.set({ translationTone: tone });
-    console.log('Tone changed to:', tone);
   };
 
   const handleCloseInstantPopup = () => {
@@ -256,15 +227,70 @@ const ContentApp = () => {
     console.log('Translation copied:', translation);
   };
 
+  const handleExplain = async (type: ExplainType) => {
+    console.log('handleExplain called', { type, selection });
+
+    if (!selection) {
+      console.log('No selection, returning');
+      return;
+    }
+
+    setIsTooltipVisible(false);
+    setTooltipClicked(true);
+
+    try {
+      if (!chrome.runtime?.id) {
+        setInitialTranslation('Extension reloading, please refresh the page');
+        setIsInstantPopupVisible(true);
+        return;
+      }
+
+      const settings = await storage.get();
+      const mode = type === 'eli5' ? 'explain' : 'define';
+
+      const messagePromise = chrome.runtime.sendMessage({
+        type: 'TRANSLATE_REQUEST',
+        payload: {
+          text: selection.text,
+          targetLang: settings.targetLang,
+          mode: mode,
+        }
+      });
+
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 30000);
+      });
+
+      const response = await Promise.race([messagePromise, timeoutPromise]);
+
+      if (response && response.success) {
+        setInitialTranslation(response.data);
+        setIsInstantPopupVisible(true);
+      } else {
+        setInitialTranslation(response?.error || 'Explanation failed');
+        setIsInstantPopupVisible(true);
+      }
+    } catch (error: any) {
+      console.error('Explain request error:', error);
+      if (error.message === 'Request timeout') {
+        setInitialTranslation('Request timed out. Please try again.');
+      } else if (error.message?.includes('Extension context invalidated')) {
+        setInitialTranslation('Extension reloaded. Please refresh the page and try again.');
+      } else {
+        setInitialTranslation('Failed to communicate with extension. Please try again.');
+      }
+      setIsInstantPopupVisible(true);
+    }
+  };
+
   return (
     <>
       <TranslatorTooltip
         x={tooltipPos.x}
         y={tooltipPos.y}
         visible={isTooltipVisible && !tooltipClicked}
-        selectedTone={selectedTone}
         onTranslate={handleTranslate}
-        onToneChange={handleToneChange}
+        onExplain={handleExplain}
       />
 
       {selection && isInstantPopupVisible && initialTranslation && (
