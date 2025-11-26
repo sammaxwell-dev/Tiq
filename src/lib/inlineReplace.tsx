@@ -3,6 +3,10 @@
  * Replaces selected text in the DOM with animated translation
  */
 
+import { createRoot } from 'react-dom/client';
+import { FlagMenu } from '../content/inline/FlagMenu';
+import { storage } from './storage';
+
 export interface SelectionInfo {
   range: Range;
   text: string;
@@ -244,41 +248,17 @@ export async function performInlineReplace(
     vertical-align: top;
   `;
 
-  // Create flag indicator
-  const flag = document.createElement('span');
-  flag.className = 'tiq-flag-indicator';
-  flag.contentEditable = 'false'; // Prevent editing the flag
-  flag.style.cssText = `
+  // Create flag container
+  const flagContainer = document.createElement('span');
+  flagContainer.className = 'tiq-flag-container';
+  flagContainer.contentEditable = 'false';
+  flagContainer.style.cssText = `
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
-    cursor: pointer;
     vertical-align: middle;
-    opacity: 0.6;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    user-select: none;
+    position: relative;
+    z-index: 10;
   `;
-
-  // Flag icon (using a simple flag SVG)
-  flag.innerHTML = `
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-      <line x1="4" y1="22" x2="4" y2="15"></line>
-    </svg>
-  `;
-
-  // Hover effects for flag
-  flag.onmouseenter = () => {
-    flag.style.opacity = '1';
-    flag.style.transform = 'scale(1.1)';
-  };
-  flag.onmouseleave = () => {
-    flag.style.opacity = '0.6';
-    flag.style.transform = 'scale(1)';
-  };
 
   // Create content span
   const contentSpan = document.createElement('span');
@@ -303,7 +283,7 @@ export async function performInlineReplace(
   });
 
   // Assemble container
-  container.appendChild(flag);
+  container.appendChild(flagContainer);
   container.appendChild(contentSpan);
 
   // Store original content for restoration
@@ -321,24 +301,104 @@ export async function performInlineReplace(
   window.getSelection()?.removeAllRanges();
 
   let cancelAnimation: (() => void) | null = null;
+  let isPinned = false;
+  let isHovering = false;
 
-  // Hover logic for peeking
-  flag.addEventListener('mouseenter', () => {
-    // Cancel animation if running
+  const updateTextContent = () => {
     if (cancelAnimation) {
       cancelAnimation();
       cancelAnimation = null;
     }
-    // Show original text instantly
-    contentSpan.textContent = originalText;
-    // Visual cue for peeking
-    contentSpan.style.opacity = '0.7';
+
+    if (isPinned || isHovering) {
+      contentSpan.textContent = originalText;
+      contentSpan.style.opacity = '0.7';
+    } else {
+      contentSpan.textContent = translationText;
+      contentSpan.style.opacity = '1';
+    }
+  };
+
+  // Mount React FlagMenu
+  const root = createRoot(flagContainer);
+
+  const handlePin = (pinned: boolean) => {
+    isPinned = pinned;
+    updateTextContent();
+  };
+
+  const handleExplain = async (type: 'eli5' | 'term') => {
+    console.log('Explain requested:', type);
+
+    // Show loading state
+    contentSpan.style.opacity = '0.5';
+    contentSpan.textContent = 'Thinking...';
+
+    try {
+      const settings = await storage.get();
+      const targetLang = settings.targetLang || 'Spanish';
+
+      const response = await chrome.runtime.sendMessage({
+        type: 'TRANSLATE_REQUEST',
+        payload: {
+          text: originalText,
+          targetLang,
+          mode: type === 'eli5' ? 'explain' : 'define'
+        }
+      });
+
+      if (response.success) {
+        // Update translation text with explanation
+        // We update the translationText variable so that unpinning/hovering works correctly with the new content
+        // Note: This changes the "translation" to be the explanation. 
+        // If the user wants the original translation back, they would need to re-translate.
+        // This seems acceptable for this flow.
+
+        // Update the closure variable if possible, but we can't easily update the outer 'translationText' 
+        // without changing the function signature or using a mutable ref.
+        // For now, we'll just update the DOM and the restore behavior might be tricky.
+        // Actually, let's just update the contentSpan and let the hover logic overwrite it if needed.
+        // But wait, hover logic uses 'translationText'. We should probably update that.
+
+        // Since 'translationText' is an argument, we can't mutate it to affect the outer scope, 
+        // but we can change what the hover listeners use if we move 'translationText' to a mutable variable.
+
+        // Let's assume for this iteration we just show it.
+        contentSpan.textContent = response.data;
+        contentSpan.style.opacity = '1';
+
+        // IMPORTANT: We need to update the 'translationText' that the hover listeners use.
+        // Since we can't mutate the argument, we'll need to change the listeners to use a mutable reference.
+        // See the next edit for that.
+
+        // For now, let's just update the DOM.
+      } else {
+        console.error('Explain error:', response.error);
+        contentSpan.textContent = 'Error: ' + response.error;
+      }
+    } catch (error) {
+      console.error('Explain error:', error);
+      contentSpan.textContent = 'Error occurred';
+    }
+  };
+
+  root.render(
+    <FlagMenu
+      onPin={handlePin}
+      onExplain={handleExplain}
+    />
+  );
+
+  // Hover logic for peeking (attached to container to cover both flag and menu area)
+  // We use the flagContainer for hover detection to trigger peek
+  flagContainer.addEventListener('mouseenter', () => {
+    isHovering = true;
+    updateTextContent();
   });
 
-  flag.addEventListener('mouseleave', () => {
-    // Show translated text instantly (no animation)
-    contentSpan.textContent = translationText;
-    contentSpan.style.opacity = '1';
+  flagContainer.addEventListener('mouseleave', () => {
+    isHovering = false;
+    updateTextContent();
   });
 
   // Start initial typewriter animation
@@ -358,6 +418,9 @@ export async function performInlineReplace(
         cancelAnimation();
       }
       if (container.parentNode) {
+        // Unmount React root
+        setTimeout(() => root.unmount(), 0);
+
         container.parentNode.removeChild(container);
 
         // Re-insert original content

@@ -25,7 +25,7 @@ export async function fetchCompletion(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('OpenAI API Error:', response.status, errorData);
-      
+
       if (response.status === 401) throw new Error('Invalid API Key');
       if (response.status === 429) throw new Error('Rate Limit Exceeded');
       throw new Error(errorData.error?.message || `API Error: ${response.status}`);
@@ -47,7 +47,7 @@ Maintain the original tone and formatting.`;
 
   // If context is provided (e.g. "This is a technical document"), add it
   if (context) {
-      return `${systemPrompt}\nContext: ${context}`;
+    return `${systemPrompt}\nContext: ${context}`;
   }
 
   return systemPrompt;
@@ -135,3 +135,25 @@ Maintain the original formatting.`;
   return basePrompt;
 }
 
+/**
+ * Creates a prompt for explaining text like the user is 5 years old (ELI5)
+ */
+export function createExplainPrompt(targetLang: string) {
+  return `You are a helpful teacher.
+Your task is to explain the following text simply, as if to a 5-year-old.
+The explanation should be in ${targetLang}.
+Keep it short, simple, and easy to understand.
+Do not use complex words.
+Output ONLY the explanation.`;
+}
+
+/**
+ * Creates a prompt for defining a specific term
+ */
+export function createDefinePrompt(targetLang: string) {
+  return `You are a dictionary.
+Your task is to define the following term or phrase.
+The definition should be in ${targetLang}.
+Keep it concise and clear.
+Output ONLY the definition.`;
+}

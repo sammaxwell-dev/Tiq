@@ -1,12 +1,12 @@
 import { storage } from '../lib/storage';
-import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt, createToneAwarePrompt } from '../lib/openai';
+import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt, createToneAwarePrompt, createExplainPrompt, createDefinePrompt } from '../lib/openai';
 
 console.log('Tippr Background Service Worker started');
 
 // Message types
 type MessageType =
   | { type: 'PING' }
-  | { type: 'TRANSLATE_REQUEST'; payload: { text: string; targetLang: string; context?: string; tone?: string } }
+  | { type: 'TRANSLATE_REQUEST'; payload: { text: string; targetLang: string; context?: string; tone?: string; mode?: 'translate' | 'explain' | 'define' } }
   | { type: 'VALIDATE_API_KEY'; payload: { key: string } };
 
 chrome.runtime.onMessage.addListener((message: MessageType, _, sendResponse) => {
@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener((message: MessageType, _, sendResponse) => 
   }
 });
 
-async function handleTranslation(payload: { text: string; targetLang: string; context?: string; tone?: string }, sendResponse: (response: any) => void) {
+async function handleTranslation(payload: { text: string; targetLang: string; context?: string; tone?: string; mode?: 'translate' | 'explain' | 'define' }, sendResponse: (response: any) => void) {
   try {
     const settings = await storage.get();
     if (!settings.apiKey) {
@@ -42,7 +42,11 @@ async function handleTranslation(payload: { text: string; targetLang: string; co
     // Use tone-aware prompts based on context
     let systemPrompt: string;
 
-    if (payload.context === 'inline-replace') {
+    if (payload.mode === 'explain') {
+      systemPrompt = createExplainPrompt(payload.targetLang);
+    } else if (payload.mode === 'define') {
+      systemPrompt = createDefinePrompt(payload.targetLang);
+    } else if (payload.context === 'inline-replace') {
       // Inline replacement mode with tone
       systemPrompt = createInlineTranslationPrompt(payload.targetLang, tone);
     } else if (tone !== 'standard') {
@@ -83,15 +87,15 @@ async function handleTranslation(payload: { text: string; targetLang: string; co
 }
 
 async function handleValidation(key: string, sendResponse: (response: any) => void) {
-    try {
-        // Minimal request to verify key
-        await fetchCompletion(
-            { apiKey: key, model: 'gpt-3.5-turbo' }, 
-            [{ role: 'user', content: 'Hi' }]
-        );
-        sendResponse({ success: true });
-    } catch (e) {
-        sendResponse({ success: false, error: 'Invalid API Key' });
-    }
+  try {
+    // Minimal request to verify key
+    await fetchCompletion(
+      { apiKey: key, model: 'gpt-3.5-turbo' },
+      [{ role: 'user', content: 'Hi' }]
+    );
+    sendResponse({ success: true });
+  } catch (e) {
+    sendResponse({ success: false, error: 'Invalid API Key' });
+  }
 }
 
