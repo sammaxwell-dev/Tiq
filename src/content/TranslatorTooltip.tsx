@@ -5,7 +5,7 @@ import {
   Baby,
   BookOpen,
   ChevronDown,
-  Lightbulb
+  Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
@@ -22,10 +22,6 @@ interface TranslatorTooltipProps {
   onTranslateModeChange: (mode: TranslateMode) => void;
   onExplain?: (type: ExplainType) => void;
 }
-
-// Calculate tooltip height for dropdown positioning
-const TOOLTIP_HEIGHT = 48; // Approximate height of the tooltip
-const TOOLTIP_OFFSET = 16; // Gap between selection and tooltip
 
 const TRANSLATE_OPTIONS = [
   { mode: 'inline' as const, label: 'Inline Replace', Icon: Sparkles },
@@ -48,28 +44,37 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [activeDropdown, setActiveDropdown] = useState<'translate' | 'explain' | null>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [explainType, setExplainType] = useState<ExplainType>('eli5');
 
-  // Calculate tooltip top position (y is top of selection, tooltip is above it)
-  const tooltipTop = y - TOOLTIP_HEIGHT - TOOLTIP_OFFSET;
+  // Get current icons based on selected modes
+  const CurrentTranslateIcon = translateMode === 'inline' ? Sparkles : Languages;
+  const CurrentExplainIcon = explainType === 'eli5' ? Baby : BookOpen;
 
-  // Get current mode icon
-  const CurrentModeIcon = translateMode === 'inline' ? Sparkles : Languages;
-
-  // Hover handlers with delay
-  const handleDropdownHoverEnter = useCallback((dropdown: 'translate' | 'explain') => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-    setActiveDropdown(dropdown);
+  // Toggle dropdown on click
+  const handleDropdownToggle = useCallback((dropdown: 'translate' | 'explain') => {
+    setActiveDropdown(prev => prev === dropdown ? null : dropdown);
   }, []);
 
-  const handleDropdownHoverLeave = useCallback(() => {
-    hoverTimeoutRef.current = setTimeout(() => {
-      setActiveDropdown(null);
-    }, 250); // Increased delay for easier mouse movement
-  }, []);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (activeDropdown && tooltipRef.current && !tooltipRef.current.contains(e.target as Node)) {
+        const dropdownMenus = document.querySelectorAll('[data-dropdown-menu]');
+        let clickedInsideDropdown = false;
+        dropdownMenus.forEach(menu => {
+          if (menu.contains(e.target as Node)) {
+            clickedInsideDropdown = true;
+          }
+        });
+        if (!clickedInsideDropdown) {
+          setActiveDropdown(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdown]);
 
   // Reset dropdown when tooltip becomes invisible
   useEffect(() => {
@@ -77,15 +82,6 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
       setActiveDropdown(null);
     }
   }, [visible]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-      }
-    };
-  }, []);
 
   if (!visible) return null;
 
@@ -102,14 +98,30 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
     onTranslate(translateMode);
   };
 
-  const handleTranslateModeSelect = (mode: TranslateMode) => {
+  const handleMainExplainClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onExplain?.(explainType);
+  };
+
+  const handleTranslateModeSelect = (e: React.MouseEvent, mode: TranslateMode) => {
+    e.preventDefault();
+    e.stopPropagation();
     onTranslateModeChange(mode);
     setActiveDropdown(null);
   };
 
-  const handleExplainSelect = (type: ExplainType) => {
-    onExplain?.(type);
+  const handleExplainTypeSelect = (e: React.MouseEvent, type: ExplainType) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExplainType(type);
     setActiveDropdown(null);
+  };
+
+  const handleDropdownButtonClick = (e: React.MouseEvent, dropdown: 'translate' | 'explain') => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleDropdownToggle(dropdown);
   };
 
   return (
@@ -143,41 +155,36 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           title={translateMode === 'inline' ? 'Replace inline' : 'Translate in popup'}
           type="button"
         >
-          <CurrentModeIcon size={isMobile ? 20 : 18} strokeWidth={2.5} />
+          <CurrentTranslateIcon size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Translate Mode Dropdown Button */}
-        <div
-          className="relative"
-          onMouseEnter={() => handleDropdownHoverEnter('translate')}
-          onMouseLeave={handleDropdownHoverLeave}
+        <button
+          className={cn(
+            'flex items-center justify-center w-7 h-7 rounded-full',
+            'hover:bg-white/10',
+            'text-white/70',
+            'transition-all duration-200',
+            'active:scale-90',
+            activeDropdown === 'translate' && 'bg-white/20 text-white',
+            isMobile ? 'w-9 h-9' : 'w-7 h-7'
+          )}
+          onClick={(e) => handleDropdownButtonClick(e, 'translate')}
+          title="Change translate mode"
+          type="button"
         >
-          <button
-            className={cn(
-              'flex items-center justify-center w-7 h-7 rounded-full',
-              'hover:bg-white/10',
-              'text-white/70',
-              'transition-all duration-200',
-              'active:scale-90',
-              activeDropdown === 'translate' && 'bg-white/20 text-white',
-              isMobile ? 'w-9 h-9' : 'w-7 h-7'
-            )}
-            title="Change translate mode"
-            type="button"
+          <motion.div
+            animate={{ rotate: activeDropdown === 'translate' ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <motion.div
-              animate={{ rotate: activeDropdown === 'translate' ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown size={isMobile ? 14 : 12} strokeWidth={2.5} />
-            </motion.div>
-          </button>
-        </div>
+            <ChevronDown size={isMobile ? 14 : 12} strokeWidth={2.5} />
+          </motion.div>
+        </button>
 
         {/* Divider */}
         <div className="w-px h-5 mx-1 bg-white/20" />
 
-        {/* Explain Button */}
+        {/* Main Explain Button - shows current explain type icon */}
         <button
           className={cn(
             'flex items-center justify-center w-10 h-10 rounded-full',
@@ -186,40 +193,35 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
             'active:scale-90',
             isMobile ? 'w-12 h-12' : 'w-10 h-10'
           )}
-          onClick={() => handleExplainSelect('eli5')}
-          title="Explain"
+          onClick={handleMainExplainClick}
+          title={explainType === 'eli5' ? "Explain like I'm 5" : 'Define term'}
           type="button"
         >
-          <Lightbulb size={isMobile ? 20 : 18} strokeWidth={2.5} />
+          <CurrentExplainIcon size={isMobile ? 20 : 18} strokeWidth={2.5} />
         </button>
 
         {/* Explain Dropdown Button */}
-        <div
-          className="relative"
-          onMouseEnter={() => handleDropdownHoverEnter('explain')}
-          onMouseLeave={handleDropdownHoverLeave}
+        <button
+          className={cn(
+            'flex items-center justify-center w-7 h-7 rounded-full',
+            'hover:bg-white/10',
+            'text-white/70',
+            'transition-all duration-200',
+            'active:scale-90',
+            activeDropdown === 'explain' && 'bg-white/20 text-white',
+            isMobile ? 'w-9 h-9' : 'w-7 h-7'
+          )}
+          onClick={(e) => handleDropdownButtonClick(e, 'explain')}
+          title="More explain options"
+          type="button"
         >
-          <button
-            className={cn(
-              'flex items-center justify-center w-7 h-7 rounded-full',
-              'hover:bg-white/10',
-              'text-white/70',
-              'transition-all duration-200',
-              'active:scale-90',
-              activeDropdown === 'explain' && 'bg-white/20 text-white',
-              isMobile ? 'w-9 h-9' : 'w-7 h-7'
-            )}
-            title="More explain options"
-            type="button"
+          <motion.div
+            animate={{ rotate: activeDropdown === 'explain' ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <motion.div
-              animate={{ rotate: activeDropdown === 'explain' ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown size={isMobile ? 14 : 12} strokeWidth={2.5} />
-            </motion.div>
-          </button>
-        </div>
+            <ChevronDown size={isMobile ? 14 : 12} strokeWidth={2.5} />
+          </motion.div>
+        </button>
 
         {/* Arrow */}
         <div
@@ -232,23 +234,23 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         </div>
       </div>
 
-      {/* Translate Mode Dropdown Menu */}
+      {/* Translate Mode Dropdown Menu - appears BELOW the tooltip */}
       <AnimatePresence>
         {activeDropdown === 'translate' && (
           <motion.div
-            initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+            data-dropdown-menu
+            initial={{ opacity: 0, y: -10, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
             transition={{ duration: 0.2, type: "spring", stiffness: 400, damping: 25 }}
-            className="fixed z-[10000] flex flex-col items-center gap-2"
+            className="fixed z-[9998] flex flex-col items-center gap-2"
             style={{
               left: `${x}px`,
-              top: `${tooltipTop - 8}px`,
-              transform: 'translateX(-50%) translateY(-100%)',
+              top: `${y + 16}px`,
+              transform: 'translateX(-50%)',
               pointerEvents: 'auto',
             }}
-            onMouseEnter={() => handleDropdownHoverEnter('translate')}
-            onMouseLeave={handleDropdownHoverLeave}
+            onMouseDown={handleMouseDown}
           >
             {TRANSLATE_OPTIONS.map((option, index) => {
               const { Icon } = option;
@@ -270,13 +272,16 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
                       'hover:bg-[#111111d1]',
                       'transition-all duration-200',
                       'text-white border-none whitespace-nowrap',
-                      isSelected && 'ring-2 ring-white/20 bg-[#111111d1]'
+                      isSelected && 'ring-2 ring-white/30 bg-[#111111d1]'
                     )}
-                    onClick={() => handleTranslateModeSelect(option.mode)}
+                    onClick={(e) => handleTranslateModeSelect(e, option.mode)}
                     type="button"
                   >
                     <Icon size={18} strokeWidth={2} />
                     <span className="text-sm font-medium">{option.label}</span>
+                    {isSelected && (
+                      <Check size={16} strokeWidth={2.5} className="text-green-400 ml-1" />
+                    )}
                   </button>
                 </motion.div>
               );
@@ -285,26 +290,27 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Explain Dropdown Menu */}
+      {/* Explain Dropdown Menu - appears BELOW the tooltip */}
       <AnimatePresence>
         {activeDropdown === 'explain' && (
           <motion.div
-            initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+            data-dropdown-menu
+            initial={{ opacity: 0, y: -10, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(8px)" }}
             transition={{ duration: 0.2, type: "spring", stiffness: 400, damping: 25 }}
-            className="fixed z-[10000] flex flex-col items-center gap-2"
+            className="fixed z-[9998] flex flex-col items-center gap-2"
             style={{
               left: `${x}px`,
-              top: `${tooltipTop - 8}px`,
-              transform: 'translateX(-50%) translateY(-100%)',
+              top: `${y + 16}px`,
+              transform: 'translateX(-50%)',
               pointerEvents: 'auto',
             }}
-            onMouseEnter={() => handleDropdownHoverEnter('explain')}
-            onMouseLeave={handleDropdownHoverLeave}
+            onMouseDown={handleMouseDown}
           >
             {EXPLAIN_OPTIONS.map((option, index) => {
               const { Icon } = option;
+              const isSelected = explainType === option.type;
 
               return (
                 <motion.div
@@ -321,13 +327,17 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
                       'shadow-[0_0_20px_rgba(0,0,0,0.2)]',
                       'hover:bg-[#111111d1]',
                       'transition-all duration-200',
-                      'text-white border-none whitespace-nowrap'
+                      'text-white border-none whitespace-nowrap',
+                      isSelected && 'ring-2 ring-white/30 bg-[#111111d1]'
                     )}
-                    onClick={() => handleExplainSelect(option.type)}
+                    onClick={(e) => handleExplainTypeSelect(e, option.type)}
                     type="button"
                   >
                     <Icon size={18} strokeWidth={2} />
                     <span className="text-sm font-medium">{option.label}</span>
+                    {isSelected && (
+                      <Check size={16} strokeWidth={2.5} className="text-green-400 ml-1" />
+                    )}
                   </button>
                 </motion.div>
               );
