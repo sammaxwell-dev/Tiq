@@ -210,7 +210,7 @@ const ContentApp = () => {
 
       if (response && response.success) {
         // Perform inline replacement with typewriter animation
-        const result = await performInlineReplace(response.data);
+        const result = await performInlineReplace(response.data, settings.targetLang);
 
         if (result) {
           console.log('Inline replacement successful');

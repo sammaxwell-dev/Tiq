@@ -3,8 +3,9 @@
  * Replaces selected text in the DOM with animated translation
  */
 
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
 import { FlagMenu } from '../content/inline/FlagMenu';
+import { TranslatedText } from '../content/inline/TranslatedText';
 
 export interface SelectionInfo {
   range: Range;
@@ -225,10 +226,12 @@ export function animateTypewriter(
 /**
  * Main orchestrator: captures selection, replaces it, fetches translation, and animates
  * @param translationText The translated text to display
+ * @param targetLang The target language for contextual definitions
  * @returns Handle with restore function and cancel function
  */
 export async function performInlineReplace(
-  translationText: string
+  translationText: string,
+  targetLang: string = 'English'
 ): Promise<{ restore: () => void; cancel: () => void } | null> {
   const selectionInfo = captureSelection();
 
@@ -302,6 +305,36 @@ export async function performInlineReplace(
   let cancelAnimation: (() => void) | null = null;
   let isPinned = false;
   let isHovering = false;
+  let contentRoot: Root | null = null;
+
+  // Function to render translated text with word hover support
+  const renderTranslatedContent = (showOriginal: boolean) => {
+    if (showOriginal) {
+      // Show original text - simple text node
+      if (contentRoot) {
+        contentRoot.unmount();
+        contentRoot = null;
+      }
+      contentSpan.textContent = originalText;
+      contentSpan.style.opacity = '0.7';
+    } else {
+      // Show translation with word hover support
+      contentSpan.textContent = '';
+      contentSpan.style.opacity = '1';
+      
+      if (!contentRoot) {
+        contentRoot = createRoot(contentSpan);
+      }
+      
+      contentRoot.render(
+        <TranslatedText
+          text={translationText}
+          fullSentence={translationText}
+          targetLang={targetLang}
+        />
+      );
+    }
+  };
 
   const updateTextContent = () => {
     if (cancelAnimation) {
@@ -309,13 +342,7 @@ export async function performInlineReplace(
       cancelAnimation = null;
     }
 
-    if (isPinned || isHovering) {
-      contentSpan.textContent = originalText;
-      contentSpan.style.opacity = '0.7';
-    } else {
-      contentSpan.textContent = translationText;
-      contentSpan.style.opacity = '1';
-    }
+    renderTranslatedContent(isPinned || isHovering);
   };
 
   // Mount React FlagMenu
@@ -353,6 +380,9 @@ export async function performInlineReplace(
     () => {
       console.log('Inline translation animation complete');
       cancelAnimation = null;
+      
+      // After animation, render React component with word hover support
+      renderTranslatedContent(false);
     }
   );
 
@@ -362,8 +392,13 @@ export async function performInlineReplace(
         cancelAnimation();
       }
       if (container.parentNode) {
-        // Unmount React root
-        setTimeout(() => root.unmount(), 0);
+        // Unmount React roots
+        setTimeout(() => {
+          root.unmount();
+          if (contentRoot) {
+            contentRoot.unmount();
+          }
+        }, 0);
 
         container.parentNode.removeChild(container);
 

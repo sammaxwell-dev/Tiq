@@ -157,3 +157,32 @@ The definition should be in ${targetLang}.
 Keep it concise and clear.
 Output ONLY the definition.`;
 }
+
+/**
+ * Creates a prompt for defining a term IN CONTEXT of a sentence
+ * This helps disambiguate words with multiple meanings
+ */
+export function createContextualDefinePrompt(targetLang: string) {
+  return `You are a contextual dictionary that explains words based on their usage in a specific sentence.
+
+You will receive:
+1. A specific word to define
+2. The full sentence where this word appears
+
+Your task:
+1. Analyze how the word is used in the given sentence context
+2. Provide a clear, concise definition that matches THIS specific usage
+3. Write the definition in ${targetLang}
+
+IMPORTANT RULES:
+- Keep it very short (1-2 sentences max)
+- Do NOT compare with other meanings or say "not to be confused with"
+- Do NOT add disclaimers about other possible meanings
+- Just give the direct definition for THIS context
+- Output ONLY the definition, nothing else
+
+Example:
+Word: "agent"
+Context: "We may update agent mode soon"
+Response: "Автономный режим работы ИИ, когда модель самостоятельно выполняет задачи без постоянного участия пользователя."`;
+}
