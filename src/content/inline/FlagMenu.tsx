@@ -4,12 +4,25 @@ import { createPortal } from 'react-dom';
 import {
     Flag,
     BookOpen,
-    Baby
+    Baby,
+    X,
+    Copy,
+    Check,
+    Loader2
 } from 'lucide-react';
 
 interface FlagMenuProps {
     onPin: (isPinned: boolean) => void;
-    onExplain: (type: 'eli5' | 'term') => void;
+    originalText: string;
+}
+
+type ExplainType = 'eli5' | 'term';
+
+interface ExplanationState {
+    type: ExplainType;
+    content: string;
+    loading: boolean;
+    error: string | null;
 }
 
 const MENU_OPTIONS = [
@@ -68,6 +81,74 @@ const styles = {
     menuButtonHover: {
         backgroundColor: 'rgba(17, 17, 17, 0.82)', // #111111d1
     },
+    // Explanation popup styles
+    popupContainer: {
+        position: 'fixed' as const,
+        zIndex: 10001,
+        maxWidth: '320px',
+        minWidth: '200px',
+        backgroundColor: 'rgba(17, 17, 17, 0.95)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderRadius: '16px',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        color: 'white',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        pointerEvents: 'auto' as const,
+        overflow: 'hidden',
+    },
+    popupHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '12px 16px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        gap: '8px',
+    },
+    popupTitle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '13px',
+        fontWeight: 600,
+        color: 'rgba(255, 255, 255, 0.9)',
+    },
+    popupActions: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+    },
+    popupIconButton: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '28px',
+        height: '28px',
+        borderRadius: '8px',
+        border: 'none',
+        backgroundColor: 'transparent',
+        color: 'rgba(255, 255, 255, 0.6)',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+    },
+    popupContent: {
+        padding: '16px',
+        fontSize: '14px',
+        lineHeight: '1.6',
+        color: 'rgba(255, 255, 255, 0.85)',
+        maxHeight: '300px',
+        overflowY: 'auto' as const,
+    },
+    loadingContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px',
+        gap: '8px',
+        color: 'rgba(255, 255, 255, 0.6)',
+        fontSize: '14px',
+    },
 };
 
 // Calculate safe menu position within viewport
@@ -101,17 +182,61 @@ function calculateMenuPosition(
     return { x, y, openUpward };
 }
 
+// Calculate popup position (larger, so different logic)
+function calculatePopupPosition(
+    flagRect: DOMRect,
+    popupWidth: number = 320,
+    popupHeight: number = 200
+): { x: number; y: number } {
+    const padding = 16;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Try to position to the right of the flag first
+    let x = flagRect.right + 8;
+    let y = flagRect.top;
+    
+    // If would go off right edge, position to the left
+    if (x + popupWidth > viewportWidth - padding) {
+        x = flagRect.left - popupWidth - 8;
+    }
+    
+    // If would go off left edge, center it
+    if (x < padding) {
+        x = Math.max(padding, (viewportWidth - popupWidth) / 2);
+    }
+    
+    // Ensure y doesn't go off bottom
+    if (y + popupHeight > viewportHeight - padding) {
+        y = viewportHeight - popupHeight - padding;
+    }
+    
+    // Ensure y doesn't go off top
+    if (y < padding) {
+        y = padding;
+    }
+    
+    return { x, y };
+}
+
 export const FlagMenu: React.FC<FlagMenuProps> = ({
     onPin,
-    onExplain
+    originalText
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isPinned, setIsPinned] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0, openUpward: false });
     const [hoveredButton, setHoveredButton] = useState<string | null>(null);
     const [menuVisible, setMenuVisible] = useState(false);
+    const [copied, setCopied] = useState(false);
+    
+    // Explanation popup state
+    const [explanation, setExplanation] = useState<ExplanationState | null>(null);
+    const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
+    
     const flagRef = useRef<HTMLDivElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
+    const popupRef = useRef<HTMLDivElement>(null);
     const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Calculate menu position and animate when opening
@@ -141,18 +266,24 @@ export const FlagMenu: React.FC<FlagMenuProps> = ({
             
             const clickedOutsideFlag = !flagRef.current || !flagRef.current.contains(target);
             const clickedOutsideMenu = !menuRef.current || !menuRef.current.contains(target);
+            const clickedOutsidePopup = !popupRef.current || !popupRef.current.contains(target);
             
             if (clickedOutsideFlag && clickedOutsideMenu) {
                 setIsOpen(false);
             }
+            
+            // Close popup if clicked outside
+            if (clickedOutsidePopup && clickedOutsideFlag) {
+                setExplanation(null);
+            }
         };
 
-        if (isOpen) {
+        if (isOpen || explanation) {
             // Use capture phase to catch events before they bubble
             document.addEventListener('mousedown', handleClickOutside, true);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside, true);
-    }, [isOpen]);
+    }, [isOpen, explanation]);
 
     // Click on flag toggles pin
     const handleFlagClick = (e: React.MouseEvent) => {
@@ -162,9 +293,72 @@ export const FlagMenu: React.FC<FlagMenuProps> = ({
         onPin(newPinnedState);
     };
 
-    const handleExplain = (type: 'eli5' | 'term') => {
-        onExplain(type);
+    const handleExplain = async (type: ExplainType) => {
         setIsOpen(false);
+        
+        // Calculate popup position
+        if (flagRef.current) {
+            const rect = flagRef.current.getBoundingClientRect();
+            setPopupPosition(calculatePopupPosition(rect));
+        }
+        
+        // Set loading state
+        setExplanation({
+            type,
+            content: '',
+            loading: true,
+            error: null,
+        });
+        
+        try {
+            const response = await chrome.runtime.sendMessage({
+                type: 'TRANSLATE_REQUEST',
+                payload: {
+                    text: originalText,
+                    targetLang: 'English', // Explanations are in user's language
+                    mode: type === 'eli5' ? 'explain' : 'define'
+                }
+            });
+            
+            if (response.success) {
+                setExplanation({
+                    type,
+                    content: response.data,
+                    loading: false,
+                    error: null,
+                });
+            } else {
+                setExplanation({
+                    type,
+                    content: '',
+                    loading: false,
+                    error: response.error || 'Failed to get explanation',
+                });
+            }
+        } catch (error) {
+            setExplanation({
+                type,
+                content: '',
+                loading: false,
+                error: 'Network error occurred',
+            });
+        }
+    };
+
+    const handleClosePopup = () => {
+        setExplanation(null);
+    };
+
+    const handleCopyExplanation = async () => {
+        if (explanation?.content) {
+            try {
+                await navigator.clipboard.writeText(explanation.content);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        }
     };
 
     const handleMouseEnter = () => {
@@ -271,6 +465,86 @@ export const FlagMenu: React.FC<FlagMenuProps> = ({
                     })}
                 </div>,
                 document.body
+            )}
+
+            {/* Explanation Popup */}
+            {explanation && createPortal(
+                <div
+                    ref={popupRef}
+                    style={{
+                        ...styles.popupContainer,
+                        left: `${popupPosition.x}px`,
+                        top: `${popupPosition.y}px`,
+                    }}
+                >
+                    {/* Header */}
+                    <div style={styles.popupHeader}>
+                        <div style={styles.popupTitle}>
+                            {explanation.type === 'eli5' ? (
+                                <>
+                                    <Baby size={16} />
+                                    <span>Simple Explanation</span>
+                                </>
+                            ) : (
+                                <>
+                                    <BookOpen size={16} />
+                                    <span>Definition</span>
+                                </>
+                            )}
+                        </div>
+                        <div style={styles.popupActions}>
+                            {!explanation.loading && explanation.content && (
+                                <button
+                                    onClick={handleCopyExplanation}
+                                    style={{
+                                        ...styles.popupIconButton,
+                                        color: copied ? '#22c55e' : 'rgba(255, 255, 255, 0.6)',
+                                    }}
+                                    title="Copy to clipboard"
+                                    type="button"
+                                >
+                                    {copied ? <Check size={16} /> : <Copy size={16} />}
+                                </button>
+                            )}
+                            <button
+                                onClick={handleClosePopup}
+                                style={styles.popupIconButton}
+                                title="Close"
+                                type="button"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Content */}
+                    {explanation.loading ? (
+                        <div style={styles.loadingContainer}>
+                            <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                            <span>Thinking...</span>
+                        </div>
+                    ) : explanation.error ? (
+                        <div style={{ ...styles.popupContent, color: '#f87171' }}>
+                            {explanation.error}
+                        </div>
+                    ) : (
+                        <div style={styles.popupContent}>
+                            {explanation.content}
+                        </div>
+                    )}
+                </div>,
+                document.body
+            )}
+
+            {/* Inject keyframes for spinner */}
+            {explanation?.loading && createPortal(
+                <style>{`
+                    @keyframes spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                `}</style>,
+                document.head
             )}
         </>
     );

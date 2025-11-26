@@ -5,7 +5,6 @@
 
 import { createRoot } from 'react-dom/client';
 import { FlagMenu } from '../content/inline/FlagMenu';
-import { storage } from './storage';
 
 export interface SelectionInfo {
   range: Range;
@@ -327,65 +326,10 @@ export async function performInlineReplace(
     updateTextContent();
   };
 
-  const handleExplain = async (type: 'eli5' | 'term') => {
-    console.log('Explain requested:', type);
-
-    // Show loading state
-    contentSpan.style.opacity = '0.5';
-    contentSpan.textContent = 'Thinking...';
-
-    try {
-      const settings = await storage.get();
-      const targetLang = settings.targetLang || 'Spanish';
-
-      const response = await chrome.runtime.sendMessage({
-        type: 'TRANSLATE_REQUEST',
-        payload: {
-          text: originalText,
-          targetLang,
-          mode: type === 'eli5' ? 'explain' : 'define'
-        }
-      });
-
-      if (response.success) {
-        // Update translation text with explanation
-        // We update the translationText variable so that unpinning/hovering works correctly with the new content
-        // Note: This changes the "translation" to be the explanation. 
-        // If the user wants the original translation back, they would need to re-translate.
-        // This seems acceptable for this flow.
-
-        // Update the closure variable if possible, but we can't easily update the outer 'translationText' 
-        // without changing the function signature or using a mutable ref.
-        // For now, we'll just update the DOM and the restore behavior might be tricky.
-        // Actually, let's just update the contentSpan and let the hover logic overwrite it if needed.
-        // But wait, hover logic uses 'translationText'. We should probably update that.
-
-        // Since 'translationText' is an argument, we can't mutate it to affect the outer scope, 
-        // but we can change what the hover listeners use if we move 'translationText' to a mutable variable.
-
-        // Let's assume for this iteration we just show it.
-        contentSpan.textContent = response.data;
-        contentSpan.style.opacity = '1';
-
-        // IMPORTANT: We need to update the 'translationText' that the hover listeners use.
-        // Since we can't mutate the argument, we'll need to change the listeners to use a mutable reference.
-        // See the next edit for that.
-
-        // For now, let's just update the DOM.
-      } else {
-        console.error('Explain error:', response.error);
-        contentSpan.textContent = 'Error: ' + response.error;
-      }
-    } catch (error) {
-      console.error('Explain error:', error);
-      contentSpan.textContent = 'Error occurred';
-    }
-  };
-
   root.render(
     <FlagMenu
       onPin={handlePin}
-      onExplain={handleExplain}
+      originalText={originalText}
     />
   );
 

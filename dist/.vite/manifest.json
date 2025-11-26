@@ -9,8 +9,8 @@
     "file": "assets/Button-Dlz1g6dN.js",
     "name": "Button"
   },
-  "_ContentApp-r20GVy0_.js": {
-    "file": "assets/ContentApp-r20GVy0_.js",
+  "_ContentApp-DOC0UrsA.js": {
+    "file": "assets/ContentApp-DOC0UrsA.js",
     "name": "ContentApp",
     "imports": [
       "_Button-Dlz1g6dN.js",
@@ -37,29 +37,29 @@
     "name": "storage"
   },
   "_tailwind-!~{003}~.js": {
-    "file": "assets/tailwind-BvK-lTep.css",
+    "file": "assets/tailwind-BYQc3keW.css",
     "src": "_tailwind-!~{003}~.js"
   },
-  "_tailwind-DOB8zxO4.js": {
-    "file": "assets/tailwind-DOB8zxO4.js",
+  "_tailwind-Bp2jyw2o.js": {
+    "file": "assets/tailwind-Bp2jyw2o.js",
     "name": "tailwind",
     "css": [
-      "assets/tailwind-BvK-lTep.css"
+      "assets/tailwind-BYQc3keW.css"
     ]
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-9-hse-7z.js",
+    "file": "assets/index.tsx-loader-wQI9o5cl.js",
     "src": "index.tsx-loader.js"
   },
   "playground.html": {
-    "file": "assets/playground-CSGHd78i.js",
+    "file": "assets/playground-CB-fvJ7u.js",
     "name": "playground",
     "src": "playground.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-DOB8zxO4.js",
+      "_tailwind-Bp2jyw2o.js",
       "_Button-Dlz1g6dN.js",
-      "_ContentApp-r20GVy0_.js",
+      "_ContentApp-DOC0UrsA.js",
       "_storage-CmcN9rvR.js",
       "_sparkles-BSOUj1E2.js"
     ]
@@ -74,36 +74,36 @@
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-hQUxWVCx.js",
+    "file": "assets/index.tsx-Bj98t-zt.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
       "_Button-Dlz1g6dN.js",
-      "_ContentApp-r20GVy0_.js",
+      "_ContentApp-DOC0UrsA.js",
       "_storage-CmcN9rvR.js",
       "_sparkles-BSOUj1E2.js"
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-2F-jhR_e.js",
+    "file": "assets/index.html-BlB75ugx.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-DOB8zxO4.js",
+      "_tailwind-Bp2jyw2o.js",
       "_Button-Dlz1g6dN.js",
       "_Input-DldoxaWi.js",
       "_storage-CmcN9rvR.js"
     ]
   },
   "src/popup/index.html": {
-    "file": "assets/index.html-CkLln8kX.js",
+    "file": "assets/index.html-BGvmiJql.js",
     "name": "index.html",
     "src": "src/popup/index.html",
     "isEntry": true,
     "imports": [
-      "_tailwind-DOB8zxO4.js",
+      "_tailwind-Bp2jyw2o.js",
       "_Button-Dlz1g6dN.js",
       "_Input-DldoxaWi.js",
       "_sparkles-BSOUj1E2.js",
