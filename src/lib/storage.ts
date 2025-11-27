@@ -2,6 +2,15 @@ import { TranslationTone } from '../types/tone';
 
 export type TranslateMode = 'modal' | 'inline';
 
+export interface TranslationHistoryItem {
+  id: string;
+  sourceText: string;
+  translatedText: string;
+  sourceLang: string;
+  targetLang: string;
+  timestamp: number;
+}
+
 export interface AppSettings {
   apiKey: string;
   targetLang: string;
@@ -23,6 +32,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   translationTone: 'standard',
   translateMode: 'inline',
 };
+
+const MAX_HISTORY_ITEMS = 50;
 
 export const storage = {
   get: async (): Promise<AppSettings> => {
@@ -59,5 +70,62 @@ export const storage = {
 
     chrome.storage.onChanged.addListener(listener);
     return () => chrome.storage.onChanged.removeListener(listener);
+  }
+};
+
+// History storage (uses local storage, not sync)
+export const historyStorage = {
+  get: async (): Promise<TranslationHistoryItem[]> => {
+    if (typeof chrome === 'undefined' || !chrome.storage) {
+      const local = localStorage.getItem('tippr_history');
+      return local ? JSON.parse(local) : [];
+    }
+    
+    const result = await chrome.storage.local.get({ history: [] });
+    return result.history as TranslationHistoryItem[];
+  },
+
+  add: async (item: Omit<TranslationHistoryItem, 'id' | 'timestamp'>): Promise<void> => {
+    const newItem: TranslationHistoryItem = {
+      ...item,
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+    };
+
+    if (typeof chrome === 'undefined' || !chrome.storage) {
+      const current = localStorage.getItem('tippr_history');
+      const history = current ? JSON.parse(current) : [];
+      const updated = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
+      localStorage.setItem('tippr_history', JSON.stringify(updated));
+      return;
+    }
+
+    const result = await chrome.storage.local.get({ history: [] });
+    const history = result.history as TranslationHistoryItem[];
+    const updated = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
+    await chrome.storage.local.set({ history: updated });
+  },
+
+  clear: async (): Promise<void> => {
+    if (typeof chrome === 'undefined' || !chrome.storage) {
+      localStorage.removeItem('tippr_history');
+      return;
+    }
+    await chrome.storage.local.set({ history: [] });
+  },
+
+  remove: async (id: string): Promise<void> => {
+    if (typeof chrome === 'undefined' || !chrome.storage) {
+      const current = localStorage.getItem('tippr_history');
+      const history = current ? JSON.parse(current) : [];
+      const updated = history.filter((item: TranslationHistoryItem) => item.id !== id);
+      localStorage.setItem('tippr_history', JSON.stringify(updated));
+      return;
+    }
+
+    const result = await chrome.storage.local.get({ history: [] });
+    const history = result.history as TranslationHistoryItem[];
+    const updated = history.filter(item => item.id !== id);
+    await chrome.storage.local.set({ history: updated });
   }
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import TranslatorTooltip, { ExplainType, TranslateMode } from './TranslatorTooltip';
 import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
-import { storage } from '../lib/storage';
+import { storage, historyStorage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
 
 const ContentApp = () => {
@@ -157,6 +157,14 @@ const ContentApp = () => {
       if (response && response.success) {
         setInitialTranslation(response.data);
         setIsInstantPopupVisible(true);
+        
+        // Save to history
+        await historyStorage.add({
+          sourceText: selection!.text,
+          translatedText: response.data,
+          sourceLang: 'auto',
+          targetLang: settings.targetLang,
+        });
       } else {
         setInitialTranslation(response?.error || 'Translation failed');
         setIsInstantPopupVisible(true);
@@ -205,6 +213,14 @@ const ContentApp = () => {
 
         if (result) {
           console.log('Inline replacement successful');
+          
+          // Save to history
+          await historyStorage.add({
+            sourceText: selection!.text,
+            translatedText: response.data,
+            sourceLang: 'auto',
+            targetLang: settings.targetLang,
+          });
         }
       } else {
         console.error('Translation failed:', response?.error);
