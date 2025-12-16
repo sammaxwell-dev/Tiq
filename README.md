@@ -2,7 +2,7 @@
   <img src="src/assets/icon128.png" alt="Tippr Logo" width="128" height="128">
 </p>
 
-<h1 align="center">Tippr</h1>
+<h1 align="center">Lume</h1>
 
 <p align="center">
   <strong>AI-Powered Browser Translation Extension</strong>
