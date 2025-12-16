@@ -1,7 +1,7 @@
 import { storage } from '../lib/storage';
 import { fetchCompletion, createTranslationPrompt, createInlineTranslationPrompt, createToneAwarePrompt, createExplainPrompt, createDefinePrompt, createContextualDefinePrompt } from '../lib/openai';
 
-console.log('Tippr Background Service Worker started');
+console.log('Lume Background Service Worker started');
 
 // Message types
 type MessageType =

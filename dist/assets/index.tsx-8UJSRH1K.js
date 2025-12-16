@@ -1,0 +1,1 @@
+import{a as e,j as t}from"./Button-Dlz1g6dN.js";import{S as n,C as r}from"./ContentApp-lTWxLvNV.js";import"./storage-Cz7dAfo5.js";import"./sparkles-Du_GlSm1.js";console.log("Lume content script loaded");const o=document.createElement("div");o.id="lume-container";document.body.appendChild(o);const s=e(o);s.render(t.jsx(n,{children:t.jsx(r,{})}));

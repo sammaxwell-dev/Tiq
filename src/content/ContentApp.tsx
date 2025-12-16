@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import TranslatorTooltip, { ExplainType, TranslateMode } from './TranslatorTooltip';
-import { InstantTranslationPopUp } from './modal/InstantTranslationPopUp';
+import { InstantTranslationPopUp, PopupContentType } from './modal/InstantTranslationPopUp';
 import { storage, historyStorage } from '../lib/storage';
 import { performInlineReplace } from '../lib/inlineReplace';
 
@@ -11,6 +11,7 @@ const ContentApp = () => {
   const [tooltipClicked, setTooltipClicked] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [initialTranslation, setInitialTranslation] = useState<string | undefined>(undefined);
+  const [popupContentType, setPopupContentType] = useState<PopupContentType>('translate');
   const [translateMode, setTranslateMode] = useState<TranslateMode>('inline');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isSelectingRef = useRef(false);
@@ -131,14 +132,18 @@ const ContentApp = () => {
   };
 
   const handleModalTranslation = async () => {
+    console.log('handleModalTranslation started');
     try {
       if (!chrome.runtime?.id) {
+        console.log('chrome.runtime.id is missing');
         setInitialTranslation('Extension reloading, please refresh the page');
         setIsInstantPopupVisible(true);
         return;
       }
 
+      console.log('Fetching settings...');
       const settings = await storage.get();
+      console.log('Settings fetched:', settings);
 
       const messagePromise = chrome.runtime.sendMessage({
         type: 'TRANSLATE_REQUEST',
@@ -152,12 +157,16 @@ const ContentApp = () => {
         setTimeout(() => reject(new Error('Request timeout')), 30000);
       });
 
+      console.log('Waiting for translation response...');
       const response = await Promise.race([messagePromise, timeoutPromise]);
+      console.log('Response received:', response);
 
       if (response && response.success) {
+        console.log('Setting popup visible with translation');
         setInitialTranslation(response.data);
+        setPopupContentType('translate');
         setIsInstantPopupVisible(true);
-        
+
         // Save to history
         await historyStorage.add({
           sourceText: selection!.text,
@@ -167,6 +176,7 @@ const ContentApp = () => {
         });
       } else {
         setInitialTranslation(response?.error || 'Translation failed');
+        setPopupContentType('translate');
         setIsInstantPopupVisible(true);
       }
     } catch (error: any) {
@@ -213,7 +223,7 @@ const ContentApp = () => {
 
         if (result) {
           console.log('Inline replacement successful');
-          
+
           // Save to history
           await historyStorage.add({
             sourceText: selection!.text,
@@ -292,13 +302,19 @@ const ContentApp = () => {
         setTimeout(() => reject(new Error('Request timeout')), 30000);
       });
 
+      console.log('Waiting for explain response...');
       const response = await Promise.race([messagePromise, timeoutPromise]);
+      console.log('Explain response received:', response);
 
       if (response && response.success) {
+        console.log('Setting popup visible with explanation');
         setInitialTranslation(response.data);
+        setPopupContentType(type === 'eli5' ? 'explain' : 'define');
         setIsInstantPopupVisible(true);
       } else {
+        console.log('Explain failed:', response?.error);
         setInitialTranslation(response?.error || 'Explanation failed');
+        setPopupContentType(type === 'eli5' ? 'explain' : 'define');
         setIsInstantPopupVisible(true);
       }
     } catch (error: any) {
@@ -326,12 +342,13 @@ const ContentApp = () => {
         onExplain={handleExplain}
       />
 
-      {selection && isInstantPopupVisible && initialTranslation && (
+      {isInstantPopupVisible && initialTranslation && (
         <InstantTranslationPopUp
           translation={initialTranslation}
           position={tooltipPos}
           onClose={handleCloseInstantPopup}
           onCopy={handleCopyTranslation}
+          contentType={popupContentType}
         />
       )}
     </>

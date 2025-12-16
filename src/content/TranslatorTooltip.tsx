@@ -130,7 +130,8 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
       <div
         ref={tooltipRef}
         className={cn(
-          'fixed z-[9999] flex items-center p-1 bg-[#11111198] backdrop-blur-sm rounded-full shadow-[0_0_20px_rgba(0,0,0,0.2)]',
+          'fixed z-[9999] flex items-center p-1 backdrop-blur-sm rounded-full shadow-[0_0_20px_rgba(0,0,0,0.15)]',
+          'bg-white/95 dark:bg-[#11111198] border border-gray-200/50 dark:border-transparent',
           'animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-200 ease-out',
           'hover:shadow-2xl transition-all duration-300'
         )}
@@ -146,7 +147,7 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         <button
           className={cn(
             'flex items-center justify-center w-10 h-10 rounded-full',
-            'hover:bg-white/10 text-white',
+            'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-white',
             'transition-all duration-200 ease-out',
             'active:scale-90',
             isMobile ? 'w-12 h-12' : 'w-10 h-10'
@@ -162,11 +163,11 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         <button
           className={cn(
             'flex items-center justify-center w-7 h-7 rounded-full',
-            'hover:bg-white/10',
-            'text-white/70',
+            'hover:bg-gray-100 dark:hover:bg-white/10',
+            'text-gray-500 dark:text-white/70',
             'transition-all duration-200',
             'active:scale-90',
-            activeDropdown === 'translate' && 'bg-white/20 text-white',
+            activeDropdown === 'translate' && 'bg-gray-200 dark:bg-white/20 text-gray-700 dark:text-white',
             isMobile ? 'w-9 h-9' : 'w-7 h-7'
           )}
           onClick={(e) => handleDropdownButtonClick(e, 'translate')}
@@ -182,13 +183,13 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         </button>
 
         {/* Divider */}
-        <div className="w-px h-5 mx-1 bg-white/20" />
+        <div className="w-px h-5 mx-1 bg-gray-300 dark:bg-white/20" />
 
         {/* Main Explain Button - shows current explain type icon */}
         <button
           className={cn(
             'flex items-center justify-center w-10 h-10 rounded-full',
-            'hover:bg-white/10 text-white',
+            'hover:bg-gray-100 dark:hover:bg-white/10 text-gray-700 dark:text-white',
             'transition-all duration-200 ease-out',
             'active:scale-90',
             isMobile ? 'w-12 h-12' : 'w-10 h-10'
@@ -204,11 +205,11 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
         <button
           className={cn(
             'flex items-center justify-center w-7 h-7 rounded-full',
-            'hover:bg-white/10',
-            'text-white/70',
+            'hover:bg-gray-100 dark:hover:bg-white/10',
+            'text-gray-500 dark:text-white/70',
             'transition-all duration-200',
             'active:scale-90',
-            activeDropdown === 'explain' && 'bg-white/20 text-white',
+            activeDropdown === 'explain' && 'bg-gray-200 dark:bg-white/20 text-gray-700 dark:text-white',
             isMobile ? 'w-9 h-9' : 'w-7 h-7'
           )}
           onClick={(e) => handleDropdownButtonClick(e, 'explain')}
@@ -228,7 +229,7 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
           className="absolute left-1/2 -translate-x-1/2 top-full"
           style={{ marginTop: '-1px' }}
         >
-          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-[#11111198] drop-shadow-sm">
+          <svg width="12" height="6" viewBox="0 0 12 6" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-white/95 dark:fill-[#11111198] drop-shadow-sm">
             <path d="M6 6L0 0H12L6 6Z" />
           </svg>
         </div>
@@ -267,12 +268,12 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
                   <button
                     className={cn(
                       'flex items-center gap-3 px-5 py-3 rounded-full',
-                      'bg-[#11111198] backdrop-blur-sm',
-                      'shadow-[0_0_20px_rgba(0,0,0,0.2)]',
-                      'hover:bg-[#111111d1]',
+                      'bg-white/95 dark:bg-[#11111198] backdrop-blur-sm',
+                      'shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(0,0,0,0.2)]',
+                      'hover:bg-gray-100 dark:hover:bg-[#111111d1]',
                       'transition-all duration-200',
-                      'text-white border-none whitespace-nowrap',
-                      isSelected && 'ring-2 ring-white/30 bg-[#111111d1]'
+                      'text-gray-800 dark:text-white border border-gray-200/50 dark:border-transparent whitespace-nowrap',
+                      isSelected && 'ring-2 ring-blue-400/50 dark:ring-white/30 bg-gray-100 dark:bg-[#111111d1]'
                     )}
                     onClick={(e) => handleTranslateModeSelect(e, option.mode)}
                     type="button"
@@ -323,12 +324,12 @@ const TranslatorTooltip: React.FC<TranslatorTooltipProps> = ({
                   <button
                     className={cn(
                       'flex items-center gap-3 px-5 py-3 rounded-full',
-                      'bg-[#11111198] backdrop-blur-sm',
-                      'shadow-[0_0_20px_rgba(0,0,0,0.2)]',
-                      'hover:bg-[#111111d1]',
+                      'bg-white/95 dark:bg-[#11111198] backdrop-blur-sm',
+                      'shadow-[0_0_20px_rgba(0,0,0,0.1)] dark:shadow-[0_0_20px_rgba(0,0,0,0.2)]',
+                      'hover:bg-gray-100 dark:hover:bg-[#111111d1]',
                       'transition-all duration-200',
-                      'text-white border-none whitespace-nowrap',
-                      isSelected && 'ring-2 ring-white/30 bg-[#111111d1]'
+                      'text-gray-800 dark:text-white border border-gray-200/50 dark:border-transparent whitespace-nowrap',
+                      isSelected && 'ring-2 ring-blue-400/50 dark:ring-white/30 bg-gray-100 dark:bg-[#111111d1]'
                     )}
                     onClick={(e) => handleExplainTypeSelect(e, option.type)}
                     type="button"

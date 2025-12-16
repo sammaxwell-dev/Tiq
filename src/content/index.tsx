@@ -2,10 +2,10 @@ import { createRoot } from 'react-dom/client';
 import ShadowHost from './ShadowHost';
 import ContentApp from './ContentApp';
 
-console.log('Tippr content script loaded');
+console.log('Lume content script loaded');
 
 const container = document.createElement('div');
-container.id = 'tippr-container';
+container.id = 'lume-container';
 document.body.appendChild(container);
 
 const root = createRoot(container);

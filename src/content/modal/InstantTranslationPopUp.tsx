@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Copy, Move } from 'lucide-react';
+import { X, Copy, Baby, BookOpen, Languages } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { cn } from '../../lib/utils';
+
+export type PopupContentType = 'translate' | 'explain' | 'define';
 
 interface InstantTranslationPopUpProps {
   translation: string;
   position: { x: number; y: number };
   onClose: () => void;
   onCopy: (translation: string) => void;
+  contentType?: PopupContentType;
 }
 
 export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = ({
@@ -15,12 +18,31 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
   position,
   onClose,
   onCopy,
+  contentType = 'translate',
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [currentPosition, setCurrentPosition] = useState(position);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0, currentX: 0, currentY: 0 });
+
+  // Content type configuration
+  const contentConfig = {
+    translate: {
+      title: 'Translation',
+      Icon: Languages,
+    },
+    explain: {
+      title: "Explain like I'm 5",
+      Icon: Baby,
+    },
+    define: {
+      title: 'Definition',
+      Icon: BookOpen,
+    },
+  };
+
+  const { title, Icon } = contentConfig[contentType];
 
   // Fade in animation and initial position setup
   useEffect(() => {
@@ -134,7 +156,8 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
     <div
       ref={popupRef}
       className={cn(
-        "fixed z-50 bg-[#11111198] backdrop-blur-xl rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.3)] border border-white/10 p-4 min-w-[320px] max-w-[400px] select-none",
+        "fixed z-50 backdrop-blur-xl rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.15)] p-4 min-w-[320px] max-w-[400px] select-none",
+        "bg-white/95 dark:bg-[#11111198] border border-gray-200/50 dark:border-white/10",
         !isDragging && "transition-all duration-200 ease-in-out",
         isVisible
           ? "opacity-100 scale-100"
@@ -152,16 +175,16 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
       {/* Header with close button */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Move className="h-3 w-3 text-white/40" />
-          <div className="text-sm font-medium text-white/90">
-            Translation
+          <Icon className="h-4 w-4 text-gray-500 dark:text-white/60" />
+          <div className="text-sm font-medium text-gray-900 dark:text-white/90">
+            {title}
           </div>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="h-6 w-6 p-0 text-white/40 hover:text-white hover:bg-white/10 rounded-full"
+          className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:text-white/40 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-full"
         >
           <X className="h-3 w-3" />
         </Button>
@@ -169,7 +192,7 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
 
       {/* Translation */}
       <div className="mb-4 max-h-32 overflow-y-auto custom-scrollbar">
-        <div className="text-sm text-white/90 leading-relaxed font-medium">
+        <div className="text-sm text-gray-800 dark:text-white/90 leading-relaxed font-medium">
           {translation}
         </div>
       </div>
@@ -180,7 +203,7 @@ export const InstantTranslationPopUp: React.FC<InstantTranslationPopUpProps> = (
           variant="outline"
           size="sm"
           onClick={handleCopy}
-          className="flex-1 text-xs bg-white/5 border-white/10 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20 transition-all duration-200"
+          className="flex-1 text-xs bg-gray-100 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-white/80 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-white/20 transition-all duration-200"
         >
           <Copy className="h-3 w-3 mr-1.5" />
           Copy

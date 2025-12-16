@@ -38,33 +38,33 @@ const MAX_HISTORY_ITEMS = 50;
 export const storage = {
   get: async (): Promise<AppSettings> => {
     if (typeof chrome === 'undefined' || !chrome.storage) {
-        // Fallback for dev environment
-        const local = localStorage.getItem('tippr_settings');
-        return local ? { ...DEFAULT_SETTINGS, ...JSON.parse(local) } : DEFAULT_SETTINGS;
+      // Fallback for dev environment
+      const local = localStorage.getItem('lume_settings');
+      return local ? { ...DEFAULT_SETTINGS, ...JSON.parse(local) } : DEFAULT_SETTINGS;
     }
-    
+
     const result = await chrome.storage.sync.get(DEFAULT_SETTINGS);
     return result as AppSettings;
   },
 
   set: async (settings: Partial<AppSettings>): Promise<void> => {
     if (typeof chrome === 'undefined' || !chrome.storage) {
-         const current = localStorage.getItem('tippr_settings');
-         const parsed = current ? JSON.parse(current) : DEFAULT_SETTINGS;
-         localStorage.setItem('tippr_settings', JSON.stringify({ ...parsed, ...settings }));
-         return;
+      const current = localStorage.getItem('lume_settings');
+      const parsed = current ? JSON.parse(current) : DEFAULT_SETTINGS;
+      localStorage.setItem('lume_settings', JSON.stringify({ ...parsed, ...settings }));
+      return;
     }
-    
+
     await chrome.storage.sync.set(settings);
   },
 
   // Watch for changes
   onChange: (callback: (settings: AppSettings) => void) => {
-    if (typeof chrome === 'undefined' || !chrome.storage) return () => {};
+    if (typeof chrome === 'undefined' || !chrome.storage) return () => { };
 
     const listener = (_changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
       if (areaName === 'sync') {
-         storage.get().then(callback);
+        storage.get().then(callback);
       }
     };
 
@@ -77,10 +77,10 @@ export const storage = {
 export const historyStorage = {
   get: async (): Promise<TranslationHistoryItem[]> => {
     if (typeof chrome === 'undefined' || !chrome.storage) {
-      const local = localStorage.getItem('tippr_history');
+      const local = localStorage.getItem('lume_history');
       return local ? JSON.parse(local) : [];
     }
-    
+
     const result = await chrome.storage.local.get({ history: [] });
     return result.history as TranslationHistoryItem[];
   },
@@ -93,10 +93,10 @@ export const historyStorage = {
     };
 
     if (typeof chrome === 'undefined' || !chrome.storage) {
-      const current = localStorage.getItem('tippr_history');
+      const current = localStorage.getItem('lume_history');
       const history = current ? JSON.parse(current) : [];
       const updated = [newItem, ...history].slice(0, MAX_HISTORY_ITEMS);
-      localStorage.setItem('tippr_history', JSON.stringify(updated));
+      localStorage.setItem('lume_history', JSON.stringify(updated));
       return;
     }
 
@@ -108,7 +108,7 @@ export const historyStorage = {
 
   clear: async (): Promise<void> => {
     if (typeof chrome === 'undefined' || !chrome.storage) {
-      localStorage.removeItem('tippr_history');
+      localStorage.removeItem('lume_history');
       return;
     }
     await chrome.storage.local.set({ history: [] });
@@ -116,10 +116,10 @@ export const historyStorage = {
 
   remove: async (id: string): Promise<void> => {
     if (typeof chrome === 'undefined' || !chrome.storage) {
-      const current = localStorage.getItem('tippr_history');
+      const current = localStorage.getItem('lume_history');
       const history = current ? JSON.parse(current) : [];
       const updated = history.filter((item: TranslationHistoryItem) => item.id !== id);
-      localStorage.setItem('tippr_history', JSON.stringify(updated));
+      localStorage.setItem('lume_history', JSON.stringify(updated));
       return;
     }
 

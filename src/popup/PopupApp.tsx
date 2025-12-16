@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { 
-  Copy, 
+import {
+  Copy,
   Check,
   Trash2,
   Sparkles,
@@ -63,6 +63,25 @@ const PopupApp = () => {
     }
   }, [activeTab]);
 
+  // Theme handling
+  useEffect(() => {
+    const updateTheme = async () => {
+      const settings = await storage.get();
+      const root = document.documentElement;
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (settings.theme === 'dark' || (settings.theme === 'system' && systemDark)) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    };
+
+    updateTheme();
+    const removeListener = storage.onChange(updateTheme);
+    return () => removeListener();
+  }, []);
+
   // Calculate stats
   const todayTranslations = history.filter(item => {
     const today = new Date();
@@ -98,14 +117,14 @@ const PopupApp = () => {
 
   return (
     <div className="w-[360px] h-[560px] bg-[#fafafa] dark:bg-[#09090b] text-gray-900 dark:text-gray-100 flex flex-col font-sans overflow-hidden">
-      
+
       {/* Header */}
       <header className="px-5 pt-5 pb-3 flex items-center justify-between">
-        <h1 className="text-lg font-semibold tracking-tight">Tippr</h1>
+        <h1 className="text-lg font-semibold tracking-tight">Lume</h1>
         <div className={cn(
           "flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium",
-          hasApiKey 
-            ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" 
+          hasApiKey
+            ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400"
             : "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400"
         )}>
           <div className={cn(
@@ -133,7 +152,7 @@ const PopupApp = () => {
                 </button>
               </div>
             )}
-            
+
             {history.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="text-gray-300 dark:text-gray-700 mb-3">
@@ -176,7 +195,7 @@ const PopupApp = () => {
           </div>
         ) : (
           <div className="space-y-5">
-            
+
             {/* Language Selector */}
             <div className="relative">
               <label className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wider font-medium mb-1.5 block">
@@ -196,15 +215,15 @@ const PopupApp = () => {
                   <span className="text-base font-medium">{selectedLang?.native}</span>
                   <span className="text-xs text-gray-400">({selectedLang?.name})</span>
                 </div>
-                <ChevronDown 
-                  size={16} 
+                <ChevronDown
+                  size={16}
                   className={cn(
                     "text-gray-400 transition-transform duration-200",
                     showLangDropdown && "rotate-180"
-                  )} 
+                  )}
                 />
               </button>
-              
+
               {/* Dropdown */}
               {showLangDropdown && (
                 <div className="absolute top-full left-0 right-0 mt-1 py-1 bg-white dark:bg-[#18181b] border border-gray-200 dark:border-white/10 rounded-xl shadow-lg z-50 max-h-[220px] overflow-y-auto">
@@ -288,7 +307,7 @@ const PopupApp = () => {
                   <Globe size={12} />
                   <span className="text-[10px] uppercase tracking-wide font-medium">Chars</span>
                 </div>
-                <p className="text-xl font-semibold">{totalChars > 999 ? `${(totalChars/1000).toFixed(1)}k` : totalChars}</p>
+                <p className="text-xl font-semibold">{totalChars > 999 ? `${(totalChars / 1000).toFixed(1)}k` : totalChars}</p>
               </div>
             </div>
 

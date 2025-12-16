@@ -240,19 +240,54 @@ export async function performInlineReplace(
     return null;
   }
 
-  // Create wrapper container
+  // Create wrapper container with highlight
   const container = document.createElement('span');
-  container.className = 'tiq-translation-container';
+  container.className = 'lume-translation-container';
   container.style.cssText = `
     position: relative;
-    display: inline-block;
+    display: inline;
     cursor: text;
-    vertical-align: top;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 197, 253, 0.12) 100%);
+    border-radius: 6px;
+    padding: 2px 6px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
   `;
+
+  // Track container hover state
+  let isContainerHovered = false;
+  let flagRoot: Root | null = null;
+
+  const updateFlagVisibility = () => {
+    if (flagRoot) {
+      flagRoot.render(
+        <FlagMenu
+          onPin={handlePin}
+          originalText={originalText}
+          isContainerHovered={isContainerHovered}
+        />
+      );
+    }
+  };
+
+  container.addEventListener('mouseenter', () => {
+    isContainerHovered = true;
+    container.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 197, 253, 0.2) 100%)';
+    container.style.boxShadow = '0 0 0 1px rgba(59, 130, 246, 0.2)';
+    updateFlagVisibility();
+  });
+
+  container.addEventListener('mouseleave', () => {
+    isContainerHovered = false;
+    container.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 197, 253, 0.12) 100%)';
+    container.style.boxShadow = 'none';
+    updateFlagVisibility();
+  });
 
   // Create flag container
   const flagContainer = document.createElement('span');
-  flagContainer.className = 'tiq-flag-container';
+  flagContainer.className = 'lume-flag-container';
   flagContainer.contentEditable = 'false';
   flagContainer.style.cssText = `
     display: inline-flex;
@@ -264,7 +299,7 @@ export async function performInlineReplace(
 
   // Create content span
   const contentSpan = document.createElement('span');
-  contentSpan.className = 'tiq-translation-content';
+  contentSpan.className = 'lume-translation-content';
 
   // Apply computed styles from parent to content span
   const styles = getComputedStyles(selectionInfo.containerElement);
@@ -321,11 +356,11 @@ export async function performInlineReplace(
       // Show translation with word hover support
       contentSpan.textContent = '';
       contentSpan.style.opacity = '1';
-      
+
       if (!contentRoot) {
         contentRoot = createRoot(contentSpan);
       }
-      
+
       contentRoot.render(
         <TranslatedText
           text={translationText}
@@ -346,17 +381,18 @@ export async function performInlineReplace(
   };
 
   // Mount React FlagMenu
-  const root = createRoot(flagContainer);
+  flagRoot = createRoot(flagContainer);
 
   const handlePin = (pinned: boolean) => {
     isPinned = pinned;
     updateTextContent();
   };
 
-  root.render(
+  flagRoot.render(
     <FlagMenu
       onPin={handlePin}
       originalText={originalText}
+      isContainerHovered={isContainerHovered}
     />
   );
 
@@ -380,7 +416,7 @@ export async function performInlineReplace(
     () => {
       console.log('Inline translation animation complete');
       cancelAnimation = null;
-      
+
       // After animation, render React component with word hover support
       renderTranslatedContent(false);
     }
@@ -394,7 +430,9 @@ export async function performInlineReplace(
       if (container.parentNode) {
         // Unmount React roots
         setTimeout(() => {
-          root.unmount();
+          if (flagRoot) {
+            flagRoot.unmount();
+          }
           if (contentRoot) {
             contentRoot.unmount();
           }

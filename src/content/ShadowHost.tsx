@@ -70,7 +70,7 @@ const ShadowHost: React.FC<ShadowHostProps> = ({ children }) => {
         <>
           <style>{styleSheet}</style>
           <div className={cn("gpt-translate-root font-sans text-base antialiased", isDark && "dark")}>
-            {children || <div className="p-4 bg-white shadow-lg rounded-lg border border-gray-200 text-gray-800">Tippr Ready</div>}
+            {children || <div className="p-4 bg-white shadow-lg rounded-lg border border-gray-200 text-gray-800">Lume Ready</div>}
           </div>
         </>,
         shadowRoot
